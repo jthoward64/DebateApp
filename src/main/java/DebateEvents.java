@@ -4,7 +4,10 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+
+enum Side {
+	PRO, CON, NEITHER
+}
 
 public class DebateEvents {
 	public final ObservableList<Speech> speeches = FXCollections.observableArrayList();
@@ -13,7 +16,7 @@ public class DebateEvents {
 	public final DebateEvent ld = new DebateEvent("Lincoln-Douglas", 240);
 	public final DebateEvent policy = new DebateEvent("Policy", 180);
 
-	private ArrayList<DebateEvent> events = new ArrayList<>();
+	private final ArrayList<DebateEvent> events = new ArrayList<>();
 
 	public DebateEvents() {
 		events.add(pf);
@@ -55,7 +58,7 @@ public class DebateEvents {
 	}
 
 	public DebateEvent getEvent(String eventName) {
-		for(DebateEvent event : events) {
+		for (DebateEvent event : events) {
 			if (eventName.equals(event.getName()))
 				return event;
 		}
@@ -68,9 +71,9 @@ public class DebateEvents {
 }
 
 class DebateEvent {
-	private final String            name;
+	private final String name;
 	private final ArrayList<Speech> speeches = new ArrayList<>();
-	private       int               prepSeconds;
+	private int prepSeconds;
 
 	public DebateEvent(String name, int prepSeconds) {
 		this.name = name;
@@ -79,10 +82,6 @@ class DebateEvent {
 
 	public void addSpeech(String name, int timeSeconds, Side side) {
 		speeches.add(new Speech(name, timeSeconds, side, this));
-	}
-
-	public Speech getSpeech(int speech) {
-		return speeches.get(speech);
 	}
 
 	public int getPrepSeconds() {
@@ -103,7 +102,7 @@ class DebateEvent {
 
 	public String getTimes() {
 		StringBuilder times = new StringBuilder();
-		for(Speech speech : speeches){
+		for (Speech speech : speeches) {
 			times.append(speech.getTimeSeconds());
 			times.append(',');
 		}
@@ -111,21 +110,22 @@ class DebateEvent {
 	}
 
 	public void setTimesFromString(String times) {
-		if(times.chars().filter(ch -> ch == ',').count()==speeches.size()) {
+		if (times.chars().filter(ch -> ch == ',').count() == speeches.size()) {
 			StringBuilder timesBuffer = new StringBuilder(times);
-			for(Speech speech : speeches) {
+			for (Speech speech : speeches) {
 				speech.setTimeSeconds(Integer.parseInt(timesBuffer.substring(0, timesBuffer.indexOf(","))));
 				timesBuffer.delete(0, timesBuffer.indexOf(",") + 1);
 			}
-		} else System.err.println("Wrong number of times for this event");
+		} else
+			System.err.println("Wrong number of times for this event");
 	}
 }
 
 class Speech {
 	private final String name;
-	private       int    timeSeconds;
 	private final Side side;
-	private final DebateEvent event;
+	public final DebateEvent event;
+	private int timeSeconds;
 
 	public Speech(String name, int timeSeconds, Side side, DebateEvent event) {
 		this.name = name;
@@ -134,12 +134,8 @@ class Speech {
 		this.event = event;
 	}
 
-	public DebateEvent getEvent() {
-		return event;
-	}
-
 	public Side getSide() {
-			return side;
+		return side;
 	}
 
 	public String getName() {
@@ -157,8 +153,4 @@ class Speech {
 	@Override public String toString() {
 		return name;
 	}
-}
-
-enum Side {
-	PRO, CON, NEITHER
 }

@@ -42,6 +42,8 @@ import java.awt.*;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -59,45 +61,29 @@ import java.util.stream.Collectors;
  * @author Tag Howard
  */
 public class Main extends Application {
-	public static void main(final String[] args) {
-		launch(args);
-	}
-
+	public static final int version = 100; //e.g. v1.2.3 = 123
 	final DebateEvents events = new DebateEvents();
-	double defWidth = 1150;
-	double defHeight = 600;
-	DebateEvent defEvent = events.pf;
-	final File appHome = new File(System.getProperty("user.home")+File.separator+"DebateApp");
-	final File propertiesFile = new File(appHome.getPath()+File.separator+"DebateApp.properties");
-	final Properties properties = loadProps();
-
+	final File appHome = new File(System.getProperty("user.home") + File.separator + "DebateApp");
+	final File propertiesFile = new File(appHome.getPath() + File.separator + "DebateApp.properties");
 	// Pro
 	final Pair<TextField, Timeline> proTimerPair = new Pair<>(new TextField("3:00"), new Timeline());
-	final VBox                      proPrep      = new VBox(new Label("Pro"), proTimerPair.getKey(),
-					new Button("Start prep"));
-	final HBox proFlow         = new HBox();
+	final VBox proPrep = new VBox(new Label("Pro"), proTimerPair.getKey(), new Button("Start"));
+	final HBox proFlow = new HBox();
 	final ArrayList<String> proSpeechNames = new ArrayList<>();
 	final ArrayList<TextArea> proSpeechTextAreas = new ArrayList<>();
-
 	// Con
 	final Pair<TextField, Timeline> conTimerPair = new Pair<>(new TextField("3:00"), new Timeline());
-	final VBox                      conPrep      = new VBox(new Label("Con"), conTimerPair.getKey(),
-					new Button("Start prep"));
-	final HBox conFlow         = new HBox();
+	final VBox conPrep = new VBox(new Label("Con"), conTimerPair.getKey(), new Button("Start"));
+	final HBox conFlow = new HBox();
 	final ArrayList<String> conSpeechNames = new ArrayList<>();
 	final ArrayList<TextArea> conSpeechTextAreas = new ArrayList<>();
-
 	// Main timer
 	final Pair<TextField, Timeline> bottomTimerPair = new Pair<>(new TextField("0:00"), new Timeline());
-
-	final ComboBox<Speech>          timeSelect      = new ComboBox<>();
-	final HBox                      bottom          = new HBox(bottomTimerPair.getKey(), new Button("Start"),
-					timeSelect);
-
+	final ComboBox<Speech> timeSelect = new ComboBox<>();
+	final HBox bottom = new HBox(new Label("Speech Timer "), bottomTimerPair.getKey(), new Button("Start"), timeSelect);
 	// Menu
-	final MenuBar menuBar = new MenuBar(
-					new Menu("View", null, //0
-									new MenuItem("Always on top")), //-0
+	final MenuBar menuBar = new MenuBar(new Menu("View", null, //0
+					new CheckMenuItem("Always visible")), //-0
 
 					new Menu("Flow", null, //1
 									new MenuItem("Pro"), //-0
@@ -110,42 +96,45 @@ public class Main extends Application {
 									new MenuItem("GDrive")), //-2
 
 					new Menu("Settings", null, //3
-									new Menu("Event", null ,//-0
+									new Menu("Event", null,//-0
 													new MenuItem("Public Forum"), //--0
 													new MenuItem("Lincoln-Douglas"), //--1
 													new MenuItem("Policy"), //--2
 													new SeparatorMenuItem(), //-3
 													new MenuItem("Set as Default")), //--4
-									new Menu("PlaceHolder", null //-1
-									),
+									new Menu("Custom Times"), //-1 (Filled dynamically)
 									new SeparatorMenuItem(), // -2
 									new CheckMenuItem("Save on Exit"), //-3
 									new SeparatorMenuItem(), //-4
 									new MenuItem("Set default window size") //-5
-									));
-	final BooleanProperty saveOnExit = ((CheckMenuItem)(menuBar.getMenus().get(3).getItems().get(3))).selectedProperty();
-
+					));
+	final BooleanProperty saveOnExit = ((CheckMenuItem) (menuBar.getMenus().get(3).getItems().get(3)))
+					.selectedProperty();
 	// Utility
-	final DirectoryChooser      directoryChooser = new DirectoryChooser();
-
-	final UnaryOperator<Change> timeFilter       = change -> {
-		if(change.getControlNewText().matches("[0-9]?[0-9]?:[0-9]?[0-9]?"))
+	final DirectoryChooser directoryChooser = new DirectoryChooser();
+	final UnaryOperator<Change> timeFilter = change -> {
+		if (change.getControlNewText().matches("[0-9]?[0-9]?:[0-9]?[0-9]?"))
 			return change;
 		return null;
 	};
-
-	final DateFormat            dateFormat       = new SimpleDateFormat("MM-dd-yyyy");
-	final Date                  today            = new Date();
-
+	final DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
+	final Date today = new Date();
+	final BorderPane root = new BorderPane();
+	final Scene scene = new Scene(root);
+	double defWidth = 1150;
+	double defHeight = 600;
+	DebateEvent defEvent = events.pf;
 	// Main
 	Stage primaryStage;
-	final BorderPane root  = new BorderPane();
-	final Scene      scene = new Scene(root);
-
+	final Properties properties = loadProps();
 	DebateEvent currentEvent = switchEvent(defEvent);
 
+	public static void main(final String[] args) {
+		launch(args);
+	}
+
 	public String formatTime(final int seconds) {
-		if((seconds % 60) >= 10)
+		if ((seconds % 60) >= 10)
 			return (seconds / 60) + ":" + (seconds % 60);
 		else
 			return (seconds / 60) + ":0" + (seconds % 60);
@@ -169,7 +158,7 @@ public class Main extends Application {
 		//load size
 		defWidth = Double.parseDouble(props.getProperty("defaultWidth", String.valueOf(defWidth)));
 		defHeight = Double.parseDouble(props.getProperty("defaultHeight", String.valueOf(defHeight)));
-		if(primaryStage!=null) {
+		if (primaryStage != null) {
 			primaryStage.setWidth(defWidth);
 			primaryStage.setHeight(defHeight);
 		}
@@ -193,8 +182,10 @@ public class Main extends Application {
 	}
 
 	private void saveProps() throws IOException {
-		if(appHome.mkdirs()) System.out.println("\"DebateApp\" directory created in user home");
-		if(propertiesFile.createNewFile()) System.out.println("Properties file created in \"DebateApp\" directory");
+		if (appHome.mkdirs())
+			System.out.println("\"DebateApp\" directory created in user home");
+		if (propertiesFile.createNewFile())
+			System.out.println("Properties file created in \"DebateApp\" directory");
 
 		//save size
 		properties.setProperty("defaultWidth", String.valueOf(defWidth));
@@ -223,7 +214,7 @@ public class Main extends Application {
 		loadProps();
 
 		{//Add JMetro if windows
-			if(System.getProperty("os.name").endsWith("10")) {
+			if (System.getProperty("os.name").endsWith("10")) {
 				final JMetro jmetro = new JMetro(Style.LIGHT);
 				jmetro.setScene(scene);
 			}
@@ -231,7 +222,7 @@ public class Main extends Application {
 
 		directoryChooser.setInitialDirectory(appHome);
 
-//		scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+		//		scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 
 		final Insets margin = new Insets(10.0);
 
@@ -259,6 +250,9 @@ public class Main extends Application {
 
 		timeSelect.disableProperty().bind(bottomTimerPair.getKey().editableProperty().not());
 
+		Platform.runLater(() -> menuBar.getMenus().get(0).getItems().get(0).setOnAction(e -> primaryStage
+						.setAlwaysOnTop(((CheckMenuItem) (menuBar.getMenus().get(0).getItems().get(0))).isSelected())));
+
 		{//Switch to pro
 			menuBar.getMenus().get(1).getItems().get(0).setOnAction(e -> {
 				root.setCenter(proFlow);
@@ -283,31 +277,35 @@ public class Main extends Application {
 			menuBar.getMenus().get(2).getItems().get(0).setOnAction(e -> {//Open tabroom
 				try {
 					openURL("www.tabroom.com");
-				} catch(IOException | URISyntaxException ex) {
+				} catch (IOException | URISyntaxException ex) {
 					showExceptionDialog(ex, true);
 				}
 			});
 			menuBar.getMenus().get(2).getItems().get(1).setOnAction(e -> {//Open NSDA
 				try {
 					openURL("www.speechanddebate.org");
-				} catch(IOException | URISyntaxException ex) {
+				} catch (IOException | URISyntaxException ex) {
 					showExceptionDialog(ex, true);
 				}
 			});
 			menuBar.getMenus().get(2).getItems().get(2).setOnAction(e -> {//Open GDrive
 				try {
 					openURL("drive.google.com");
-				} catch(IOException | URISyntaxException ex) {
+				} catch (IOException | URISyntaxException ex) {
 					showExceptionDialog(ex, true);
 				}
 			});
 		}
 
 		{
-			((Menu) (menuBar.getMenus().get(3).getItems().get(0))).getItems().get(0).setOnAction(e -> switchEvent(events.pf));// Switch to PF
-			((Menu) (menuBar.getMenus().get(3).getItems().get(0))).getItems().get(1).setOnAction(e -> switchEvent(events.ld));//Switch to LD
-			((Menu) (menuBar.getMenus().get(3).getItems().get(0))).getItems().get(2).setOnAction(e -> switchEvent(events.policy));//Switch to Policy
-			((Menu) (menuBar.getMenus().get(3).getItems().get(0))).getItems().get(4).setOnAction(e -> defEvent = currentEvent);//Set default event
+			((Menu) (menuBar.getMenus().get(3).getItems().get(0))).getItems().get(0)
+							.setOnAction(e -> switchEvent(events.pf));// Switch to PF
+			((Menu) (menuBar.getMenus().get(3).getItems().get(0))).getItems().get(1)
+							.setOnAction(e -> switchEvent(events.ld));//Switch to LD
+			((Menu) (menuBar.getMenus().get(3).getItems().get(0))).getItems().get(2)
+							.setOnAction(e -> switchEvent(events.policy));//Switch to Policy
+			((Menu) (menuBar.getMenus().get(3).getItems().get(0))).getItems().get(4)
+							.setOnAction(e -> defEvent = currentEvent);//Set default event
 
 			menuBar.getMenus().get(3).getItems().get(5).setOnAction(e -> {//Set default size
 				defWidth = primaryStage.getWidth();
@@ -316,7 +314,7 @@ public class Main extends Application {
 
 			timeSelect.setOnAction(e -> resetTimer(timeSelect.getValue().getTimeSeconds(), bottomTimerPair.getKey(),
 							bottomTimerPair.getValue(), //Set timer to contents of speech ComboBox
-							(Button) bottom.getChildren().get(1)));
+							(Button) bottom.getChildren().get(2)));
 		}
 
 		{//Set key binds
@@ -326,7 +324,7 @@ public class Main extends Application {
 
 			KeyCombination switchFlowCombo = new KeyCodeCombination(KeyCode.SPACE, KeyCodeCombination.CONTROL_DOWN);
 			Runnable switchFlowRunnable = () -> {
-				if(root.getCenter().equals(proFlow)) {
+				if (root.getCenter().equals(proFlow)) {
 					root.setCenter(conFlow);
 					proPrep.getChildren().get(0).setStyle("-fx-font-weight: normal;");
 					conPrep.getChildren().get(0).setStyle("-fx-font-weight: bold;");
@@ -338,24 +336,58 @@ public class Main extends Application {
 				}
 			};
 
-			KeyCombination switchEventCombo = new KeyCodeCombination(KeyCode.SPACE, KeyCodeCombination.CONTROL_DOWN, KeyCodeCombination.SHIFT_DOWN);
-			Runnable switchEventRunnable = () -> {
-				switchEvent(events.getEvents().get(events.getEvents().indexOf(events.getEvent(currentEvent.getName()))));
-			};
-
 			scene.getAccelerators().put(switchFlowCombo, switchFlowRunnable);
+
+			KeyCombination switchEventCombo = new KeyCodeCombination(KeyCode.SPACE, KeyCodeCombination.CONTROL_DOWN,
+							KeyCodeCombination.SHIFT_DOWN);
+			Runnable switchEventRunnable = () -> switchEvent(events.getEvents()
+							.get(events.getEvents().indexOf(events.getEvent(currentEvent.getName()))+1));
+
+			scene.getAccelerators().put(switchEventCombo, switchEventRunnable);
 		}
 	}
 
-	private void buildFlowEditor(HBox textParent, ArrayList<String> namesList, ArrayList<TextArea> textAreas, Side side) {
+	@Override public void start(final Stage primaryStage) {
+		this.primaryStage = primaryStage;
+
+		primaryStage.setScene(scene);
+
+		primaryStage.getIcons().addAll(new Image(getClass().getResourceAsStream("/speaker128.png")),
+						new Image(getClass().getResourceAsStream("/speaker64.png")),
+						new Image(getClass().getResourceAsStream("/speaker32.png")),
+						new Image(getClass().getResourceAsStream("/speaker16.png")));
+
+		primaryStage.setMinWidth(1150);
+		primaryStage.setMinHeight(600);
+		primaryStage.setWidth(defWidth);
+		primaryStage.setHeight(defHeight);
+
+		try {
+			checkForUpdate();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		primaryStage.show();
+	}
+
+	@Override public void stop() throws Exception {
+		saveProps();
+		if (saveOnExit.get())
+			saveFlow();
+	}
+
+	private void buildFlowEditor(HBox textParent, ArrayList<String> namesList, ArrayList<TextArea> textAreas,
+					Side side) {
 		textParent.getChildren().clear();
 		textParent.prefHeightProperty().unbind();
 		textParent.maxHeightProperty().unbind();
 		namesList.clear();
 		textAreas.clear();
 
-		ArrayList<Speech> collectedSpeeches = currentEvent.getSpeeches().stream().filter((Speech speech) -> speech.getSide().equals(side)).collect(
-						Collectors.toCollection(ArrayList::new));
+		ArrayList<Speech> collectedSpeeches = currentEvent.getSpeeches().stream()
+						.filter((Speech speech) -> speech.getSide().equals(side))
+						.collect(Collectors.toCollection(ArrayList::new));
 
 		for (Speech collectedSpeech : collectedSpeeches) {
 			Label label = new Label(collectedSpeech.getName());
@@ -377,8 +409,10 @@ public class Main extends Application {
 		currentEvent = event;
 		buildFlowEditor(proFlow, proSpeechNames, proSpeechTextAreas, Side.PRO);
 		buildFlowEditor(conFlow, conSpeechNames, conSpeechTextAreas, Side.CON);
-		resetTimer(event.getPrepSeconds(), proTimerPair.getKey(), proTimerPair.getValue(), ((Button) proPrep.getChildren().get(2)));
-		resetTimer(event.getPrepSeconds(), conTimerPair.getKey(), conTimerPair.getValue(), ((Button) conPrep.getChildren().get(2)));
+		resetTimer(event.getPrepSeconds(), proTimerPair.getKey(), proTimerPair.getValue(),
+						((Button) proPrep.getChildren().get(2)));
+		resetTimer(event.getPrepSeconds(), conTimerPair.getKey(), conTimerPair.getValue(),
+						((Button) conPrep.getChildren().get(2)));
 		timeSelect.getItems().setAll(event.getSpeeches());
 
 		return event;
@@ -396,20 +430,21 @@ public class Main extends Application {
 	private void openURL(final String url) throws IOException, URISyntaxException {
 		final String myOS = System.getProperty("os.name").toLowerCase();
 
-		if(Desktop.isDesktopSupported()) { // Probably Windows
+		if (Desktop.isDesktopSupported()) { // Probably Windows
 			final Desktop desktop = Desktop.getDesktop();
 			desktop.browse(new URI(url));
 		} else { // Definitely Non-windows
 			final Runtime runtime = Runtime.getRuntime();
-			if(myOS.contains("mac"))
+			if (myOS.contains("mac"))
 				runtime.exec("open " + url);
-			else if(myOS.contains("nix") || myOS.contains("nux"))
+			else if (myOS.contains("nix") || myOS.contains("nux"))
 				runtime.exec("xdg-open " + url);
 		}
 	}
 
 	public void resetTimer(final int seconds, final TextField field, final Timeline timeline, final Button button) {
-		final String defaultText = button.getText();
+		final String defaultText = "Start";
+		button.setText(defaultText);
 		field.setEditable(true);
 		field.setTextFormatter(new TextFormatter<Integer>(timeFilter));
 
@@ -419,10 +454,11 @@ public class Main extends Application {
 		field.setText(formatTime(seconds));
 		timeline.setCycleCount(Animation.INDEFINITE);
 		// KeyFrame event handler
+		timeline.getKeyFrames().clear();
 		timeline.getKeyFrames().add(new KeyFrame(Duration.seconds(1), event -> {
 			// update timerLabel
 			field.setText(formatTime(unFormatTime(field.getText()) - 1));
-			if(unFormatTime(field.getText()) <= 0) {
+			if (unFormatTime(field.getText()) <= 0) {
 				timeline.stop();
 				button.setText(defaultText);
 				field.setEditable(true);
@@ -438,9 +474,9 @@ public class Main extends Application {
 		}));
 
 		button.setOnAction(e -> {
-			switch(timeline.getStatus()) {
+			switch (timeline.getStatus()) {
 			case RUNNING:
-				if(unFormatTime(field.getText()) < 1)
+				if (unFormatTime(field.getText()) < 1)
 					break;
 				timeline.pause();
 				button.setStyle("-fx-background-color: lightgreen;");
@@ -448,7 +484,7 @@ public class Main extends Application {
 				field.setEditable(true);
 				break;
 			case STOPPED:
-				if(unFormatTime(field.getText()) == 0)
+				if (unFormatTime(field.getText()) == 0)
 					field.setText(formatTime(seconds));
 				field.setEditable(false);
 				button.setStyle("-fx-background-color: ff5555;");
@@ -477,14 +513,14 @@ public class Main extends Application {
 						"Choose a meaningful name for your round (e.g. your opponents team code) so that you can refer back to the round in the future.");
 		String fileName = namePrompt.showAndWait().orElse("NO_CUSTOM_NAME");
 
-		if(fileName.equals("NO_CUSTOM_NAME"))
+		if (fileName.equals("NO_CUSTOM_NAME"))
 			return;
 
 		Alert howToSavePrompt = new Alert(AlertType.INFORMATION, "How do you want to save?",
 						new ButtonType("Screenshot", ButtonData.OTHER), new ButtonType("Both", ButtonData.OTHER),
 						new ButtonType("CSV File", ButtonData.OTHER), ButtonType.CANCEL);
 		String howToSave = howToSavePrompt.showAndWait().orElse(ButtonType.CLOSE).getText();
-		switch(howToSave) {
+		switch (howToSave) {
 		case "Screenshot":
 			screenshot = true;
 			break;
@@ -501,14 +537,14 @@ public class Main extends Application {
 
 		final File directory = directoryChooser.showDialog(primaryStage);
 
-		if(directory == null)
+		if (directory == null)
 			return;
 
 		try {
-			if(csvFile) {
+			if (csvFile) {
 				final File flowFile = new File(directory.getPath() + File.separator + "Flow " + dateFormat
 								.format(today) + " " + fileName + ".csv");
-				if(!flowFile.createNewFile()) {
+				if (!flowFile.createNewFile()) {
 					Alert fileConflictAlert = new Alert(AlertType.ERROR);
 					fileConflictAlert.setContentText("The file you tried to create already exists");
 					fileConflictAlert.showAndWait();
@@ -517,26 +553,26 @@ public class Main extends Application {
 
 				String[] namesArray = new String[proSpeechNames.size() + conSpeechNames.size()];
 				int i;
-				for(i=0; i<proSpeechNames.size(); i++) {
-					namesArray[i]=proSpeechNames.get(i);
+				for (i = 0; i < proSpeechNames.size(); i++) {
+					namesArray[i] = proSpeechNames.get(i);
 				}
-				for(; i < proSpeechNames.size()+conSpeechNames.size(); i++) {
-					namesArray[i]=conSpeechNames.get(i);
+				for (; i < proSpeechNames.size() + conSpeechNames.size(); i++) {
+					namesArray[i] = conSpeechNames.get(i);
 				}
 
-				String[] flowArray = new String[proSpeechTextAreas.size()+conSpeechNames.size()];
+				String[] flowArray = new String[proSpeechTextAreas.size() + conSpeechNames.size()];
 				int j;
-				for(j=0; j<proSpeechTextAreas.size(); j++) {
+				for (j = 0; j < proSpeechTextAreas.size(); j++) {
 					flowArray[i] = proSpeechTextAreas.get(i).getText();
 				}
-				for(; j < proSpeechTextAreas.size()+conSpeechNames.size(); j++) {
+				for (; j < proSpeechTextAreas.size() + conSpeechNames.size(); j++) {
 					flowArray[i] = conSpeechTextAreas.get(i).getText();
 				}
 
 				w.writeAll(Collections.singletonList(namesArray));
 				w.writeAll(Collections.singletonList(flowArray));
 
-				if(w.checkError()) {
+				if (w.checkError()) {
 					final Alert errorMessage = new Alert(AlertType.ERROR, "There was an error while saving the file",
 									ButtonType.OK);
 					errorMessage.showAndWait();
@@ -544,11 +580,11 @@ public class Main extends Application {
 				w.flush();
 				w.close();
 			}
-			if(screenshot) {
+			if (screenshot) {
 				final WritableImage writableProImage = proFlow.snapshot(new SnapshotParameters(), null);
 				final File proFlowFile = new File(directory.getPath() + File.separator + "Pro Flow " + dateFormat
 								.format(today) + " " + fileName + ".png");
-				if(!proFlowFile.createNewFile()) {
+				if (!proFlowFile.createNewFile()) {
 					Alert fileConflictAlert = new Alert(AlertType.ERROR);
 					fileConflictAlert.setContentText("The file you tried to create already exists");
 					fileConflictAlert.showAndWait();
@@ -558,14 +594,14 @@ public class Main extends Application {
 				final WritableImage writableConImage = conFlow.snapshot(new SnapshotParameters(), null);
 				final File conFlowFile = new File(directory.getPath() + File.separator + "Con Flow " + dateFormat
 								.format(today) + " " + fileName + ".png");
-				if(!conFlowFile.createNewFile()) {
+				if (!conFlowFile.createNewFile()) {
 					Alert fileConflictAlert = new Alert(AlertType.ERROR);
 					fileConflictAlert.setContentText("The file you tried to create already exists");
 					fileConflictAlert.showAndWait();
 				}
 				ImageIO.write(SwingFXUtils.fromFXImage(writableConImage, null), "png", conFlowFile);
 			}
-		} catch(final IOException e) {
+		} catch (final IOException e) {
 			showExceptionDialog(e, false);
 		}
 
@@ -576,8 +612,8 @@ public class Main extends Application {
 		alert.setTitle("Exception Dialog");
 		alert.setHeaderText("DebateApp has experienced an issue");
 		alert.setContentText(allowSave ?
-							 "To prevent unstable operation the program will close.\nIf you would like to try to save your work press \"Save\"" :
-							 "To prevent unstable operation the program will close.");
+						"To prevent unstable operation the program will close.\nIf you would like to try to save your work press \"Save\"" :
+						"To prevent unstable operation the program will close.");
 
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
@@ -606,51 +642,58 @@ public class Main extends Application {
 
 		alert.getButtonTypes().setAll(allowSave ? saveButtonType : null, ButtonType.CLOSE);
 
-		if(alert.showAndWait().orElse(ButtonType.CLOSE).equals(saveButtonType)) {
+		if (alert.showAndWait().orElse(ButtonType.CLOSE).equals(saveButtonType)) {
 			saveFlow();
 		}
 
 		Platform.exit();
 	}
 
-	@Override public void start(final Stage primaryStage) {
-		this.primaryStage = primaryStage;
+	public void checkForUpdate() throws IOException {
 
-		primaryStage.setScene(scene);
+		URLConnection connection = new URL("https://github.com/tajetaje/DebateApp/releases/latest").openConnection();
+		connection.connect();
+		InputStream connectionInputStream = connection.getInputStream();
+		StringBuilder latestVersion = new StringBuilder();
+		latestVersion.append(connection.getURL().toExternalForm()
+						.substring(connection.getURL().toExternalForm().lastIndexOf('/') + 1));
+		for (int i = latestVersion.length() - 1; i > 0; i--) {
+			if (latestVersion.charAt(i) == '.')
+				latestVersion.deleteCharAt(i);
+		}
+		int latestVersionNumber = Integer.parseInt(latestVersion.toString());
 
-		primaryStage.getIcons().addAll(new Image(getClass().getResourceAsStream("/speaker128.png")),
-						new Image(getClass().getResourceAsStream("/speaker64.png")),
-						new Image(getClass().getResourceAsStream("/speaker32.png")),
-						new Image(getClass().getResourceAsStream("/speaker16.png")));
+		connectionInputStream.close();
 
-		primaryStage.setMinWidth(1150);
-		primaryStage.setMinHeight(600);
-		primaryStage.setWidth(defWidth);
-		primaryStage.setHeight(defHeight);
-
-		menuBar.getMenus().get(0).getItems().get(0).setOnAction(e -> primaryStage.setAlwaysOnTop(true));
-
-		primaryStage.show();
+		if (latestVersionNumber > version) {
+			Alert newVersionAlert = new Alert(AlertType.INFORMATION);
+			newVersionAlert.setHeaderText("A new version is available");
+			newVersionAlert.setTitle("Update message");
+			newVersionAlert.setContentText("Would you like to go to the download page now?");
+			newVersionAlert.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
+			System.out.println("test");
+			if (newVersionAlert.showAndWait().orElse(ButtonType.NO).getButtonData().equals(ButtonData.YES)) {
+				try {
+					openURL("https://github.com/tajetaje/DebateApp/releases/latest");
+				} catch (IOException | URISyntaxException e) {
+					showExceptionDialog(e, true);
+					}
+			}
+		}
 	}
 
 	public int unFormatTime(final String time) {
 		int seconds;
-		if(time.endsWith(":"))
+		if (time.endsWith(":"))
 			seconds = 0;
 		else
 			seconds = Integer.parseInt(time.substring(time.indexOf(':') + 1));
 		int minutes;
-		if(time.startsWith(":"))
+		if (time.startsWith(":"))
 			minutes = 0;
 		else
 			minutes = Integer.parseInt(time.substring(0, time.indexOf(':')));
 		seconds += 60 * minutes;
 		return seconds;
-	}
-
-	@Override
-	public void stop() throws Exception{
-		saveProps();
-		if(saveOnExit.get()) saveFlow();
 	}
 }

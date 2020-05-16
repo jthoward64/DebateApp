@@ -1,4 +1,8 @@
-.gitignore
 .idea/
 DebateApp.iml
 target/
+Bundle.xml
+BundleMac.json
+BundleLinux.json
+packr.jar
+update steps.txt

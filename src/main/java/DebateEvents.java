@@ -100,6 +100,15 @@ class DebateEvent {
 		return speeches;
 	}
 
+	public String getDefaultTimes() {
+		StringBuilder times = new StringBuilder();
+		for (Speech speech : speeches) {
+			times.append(speech.getDefaultTimeSeconds());
+			times.append(',');
+		}
+		return times.toString();
+	}
+
 	public String getTimes() {
 		StringBuilder times = new StringBuilder();
 		for (Speech speech : speeches) {
@@ -126,10 +135,12 @@ class Speech {
 	private final Side side;
 	public final DebateEvent event;
 	private int timeSeconds;
+	private final int defaultTimeSeconds;
 
 	public Speech(String name, int timeSeconds, Side side, DebateEvent event) {
 		this.name = name;
 		this.timeSeconds = timeSeconds;
+		this.defaultTimeSeconds = timeSeconds;
 		this.side = side;
 		this.event = event;
 	}
@@ -144,6 +155,10 @@ class Speech {
 
 	public int getTimeSeconds() {
 		return timeSeconds;
+	}
+
+	public int getDefaultTimeSeconds() {
+		return defaultTimeSeconds;
 	}
 
 	public void setTimeSeconds(int timeSeconds) {

@@ -14,23 +14,25 @@ It's an app ... for debate. OK, more specifically it is a combination digital fl
 ```
 
 ### Installing
+Sorry about any security prompts, I don't have hundreds of dollars to blow on code signing certificates
 
 MacOS
+1. Download the [.dmg bundle](https://github.com/tajetaje/DebateApp/releases/latest)
+2. Open it
+3. Drag DebateApp into your applications folder
 
-1. Download the [.app bundle](https://github.com/tajetaje/DebateApp/releases/latest)
-2. ove it into the applications folder
+**If you see any warnings about the app being unverified, see [this](https://support.apple.com/guide/mac-help/open-a-mac-app-from-an-unidentified-developer-mh40616/mac) help page**
 
 Windows
-
 1. Download the [Windows installer](https://github.com/tajetaje/DebateApp/releases/latest)
 2. Just run the installer, it will create a Start Menu entry that will run the program
 
 Linux (Sorry, no packages yet)
-
 1. Download the [.tar.gz](https://github.com/tajetaje/DebateApp/releases/latest) archive
+2. Put it somewhere
 
-##Using the app
-####Choose an event
+## Using the app
+#### Choose an event
 1. Click "Settings" in the menu
 2. Hover over "Event"
 3. Select your event
@@ -38,16 +40,16 @@ Linux (Sorry, no packages yet)
 
 Ctrl + e will also allow you to cycle between events
 
-###Save your flow
+### Save your flow
 1. Either press ctrl+s or click save in the flow menu
 2. Enter the name for you file(s)
 3. Choose a directory to save your flow, defaults to the DebateApp folder in your personal user directory
 4. Select whether to save your flow as a pair of png images, a csv file, or both
 
-###Saving app settings
+### Saving app settings
 Settings save automatically to your user folder when closing the app
 
-###Switching flow between pro and con
+### Switching flow between pro and con
 Either
  * Press Ctrl+Space
  
@@ -58,7 +60,7 @@ or
 ### Make DebateApp always on top
 In the view menu, select always on top
 
-##Known issues
+## Known issues
  * In a Windows multi-monitor setup with UI scaling on, menus may open in odd locations
 
 ## Built With

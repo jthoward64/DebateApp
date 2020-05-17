@@ -64,7 +64,7 @@ import java.util.stream.Collectors;
  * @author Tag Howard
  */
 public class Main extends Application {
-	public static final Version                       version            = new Version(1,1,0);
+	public static final Version                   version            = new Version(1,1,0);
 	final               DebateEvents              events             = new DebateEvents();
 	final               File                      appHome            = new File(
 					System.getProperty("user.home") + File.separator + "DebateApp");
@@ -288,14 +288,11 @@ public class Main extends Application {
 		//Show Dialog
 		switch(editTimesDialog.showAndWait().orElse(ButtonType.CANCEL).getButtonData()) {
 		case OK_DONE:
-			System.out.println("OK_DONE");
 			break;
 		case OTHER:
-			System.out.println("OTHER");
 			debateEvent.setTimesFromString(debateEvent.getDefaultTimes());
 			break;
 		default:
-			System.out.println("DEFAULT");
 			debateEvent.setTimesFromString(oldTimes);
 			break;
 		}
@@ -466,8 +463,8 @@ public class Main extends Application {
 						new Image(getClass().getResourceAsStream("/speaker32.png")),
 						new Image(getClass().getResourceAsStream("/speaker16.png")));
 
-		primaryStage.setMinWidth(1150);
-		primaryStage.setMinHeight(600);
+		primaryStage.setMinWidth(850);
+		primaryStage.setMinHeight(400);
 		primaryStage.setWidth(defWidth);
 		primaryStage.setHeight(defHeight);
 
@@ -502,6 +499,7 @@ public class Main extends Application {
 			Label label = new Label(collectedSpeech.getName());
 			namesList.add(collectedSpeech.getName());
 			TextArea textArea = new TextArea();
+			textArea.setWrapText(true);
 			textAreas.add(textArea);
 			label.prefWidthProperty().bind(textArea.widthProperty());
 			textParent.getChildren().add(new VBox(label, textArea));
@@ -524,8 +522,10 @@ public class Main extends Application {
 		currentEvent = event;
 		buildFlowEditor(proFlow, proSpeechNames, proSpeechTextAreas, Side.PRO);
 		buildFlowEditor(conFlow, conSpeechNames, conSpeechTextAreas, Side.CON);
+		proTimerPair.getKey().setPrefColumnCount(3);
 		resetTimer(event.getPrepSeconds(), proTimerPair.getKey(), proTimerPair.getValue(),
 						((Button) proPrep.getChildren().get(2)));
+		conTimerPair.getKey().setPrefColumnCount(3);
 		resetTimer(event.getPrepSeconds(), conTimerPair.getKey(), conTimerPair.getValue(),
 						((Button) conPrep.getChildren().get(2)));
 		timeSelect.getItems().setAll(event.getSpeeches());
@@ -787,7 +787,6 @@ public class Main extends Application {
 			newVersionAlert.setTitle("Update message");
 			newVersionAlert.setContentText("Would you like to go to the download for version " + latestVersion + " now?");
 			newVersionAlert.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
-			System.out.println("test");
 			if(newVersionAlert.showAndWait().orElse(ButtonType.NO).getButtonData().equals(ButtonData.YES)) {
 				try {
 					openURL("https://github.com/tajetaje/DebateApp/releases/latest");

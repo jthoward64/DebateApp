@@ -2,7 +2,8 @@
 DebateApp.iml
 target/
 Bundle.xml
-BundleMac.json
-BundleLinux.json
 packr.jar
 update steps.txt
+src/main/resources/META-INF/MANIFEST.MF
+macJRECache/
+linuxJRECache/

@@ -1,5 +1,7 @@
 package main.java;
 
+//TODO delete
+
 import com.opencsv.CSVWriter;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -15,15 +17,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.*;
-import javafx.scene.control.Button;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.TextFormatter.Change;
 import javafx.scene.image.Image;
@@ -33,20 +27,19 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.web.HTMLEditor;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.util.Pair;
 import jfxtras.styles.jmetro.JMetro;
 import jfxtras.styles.jmetro.Style;
+import main.java.controls.MinimalHTMLEditor;
+import main.java.structures.*;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.io.*;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -62,38 +55,31 @@ import java.util.stream.Collectors;
  * "Flaticon">www.flaticon.com</a></div>
  *
  * @author Tag Howard
+ * @deprecated 1.2.0
  */
 public class Main extends Application {
-	public static final Version                   version            = new Version(1,1,0);
-	final               DebateEvents              events             = new DebateEvents();
-	final               File                      appHome            = new File(
-					System.getProperty("user.home") + File.separator + "DebateApp");
-	final               File                      propertiesFile     = new File(
-					appHome.getPath() + File.separator + "DebateApp.properties");
+	public static final Version VERSION = new Version(1, 1, 0);
+	public final static File appHome = new File(System.getProperty("user.home") + File.separator + "DebateApp");
+	final DebateEvents events = new DebateEvents();
+	final File propertiesFile = new File(appHome.getPath() + File.separator + "DebateApp.properties");
 	// Pro
-	final               Pair<TextField, Timeline> proTimerPair       = new Pair<>(new TextField("3:00"),
-					new Timeline());
-	final               VBox                      proPrep            = new VBox(new Label("Pro"), proTimerPair.getKey(),
-					new Button("Start"));
-	final               HBox                      proFlow            = new HBox();
-	final               ArrayList<String>         proSpeechNames     = new ArrayList<>();
-	final               ArrayList<TextArea>       proSpeechTextAreas = new ArrayList<>();
+	final Pair<TextField, Timeline> proTimerPair = new Pair<>(new TextField("3:00"), new Timeline());
+	final VBox proPrep = new VBox(new Label("Pro"), proTimerPair.getKey(), new Button("Start"));
+	final HBox proFlow = new HBox();
+	final ArrayList<String> proSpeechNames = new ArrayList<>();
+	final ArrayList<HTMLEditor> proSpeechTextAreas = new ArrayList<>();
 	// Con
-	final               Pair<TextField, Timeline> conTimerPair       = new Pair<>(new TextField("3:00"),
-					new Timeline());
-	final               VBox                      conPrep            = new VBox(new Label("Con"), conTimerPair.getKey(),
-					new Button("Start"));
-	final               HBox                      conFlow            = new HBox();
-	final               ArrayList<String>         conSpeechNames     = new ArrayList<>();
-	final               ArrayList<TextArea>       conSpeechTextAreas = new ArrayList<>();
+	final Pair<TextField, Timeline> conTimerPair = new Pair<>(new TextField("3:00"), new Timeline());
+	final VBox conPrep = new VBox(new Label("Con"), conTimerPair.getKey(), new Button("Start"));
+	final HBox conFlow = new HBox();
+	final ArrayList<String> conSpeechNames = new ArrayList<>();
+	final ArrayList<HTMLEditor> conSpeechTextAreas = new ArrayList<>();
 	// Main timer
-	final               Pair<TextField, Timeline> bottomTimerPair    = new Pair<>(new TextField("0:00"),
-					new Timeline());
-	final               ComboBox<Speech>          timeSelect         = new ComboBox<>();
-	final               HBox                      bottom             = new HBox(new Label("Speech Timer "),
-					bottomTimerPair.getKey(), new Button("Start"), timeSelect);
-	// Menu TODO extract Items to individual fields
-	final               MenuBar                   menuBar            = new MenuBar(new Menu("View", null, //0
+	final Pair<TextField, Timeline> bottomTimerPair = new Pair<>(new TextField("0:00"), new Timeline());
+	final ComboBox<Speech> timeSelect = new ComboBox<>();
+	final HBox bottom = new HBox(new Label("Speech Timer "), bottomTimerPair.getKey(), new Button("Start"), timeSelect);
+
+	final MenuBar menuBar = new MenuBar(new Menu("View", null, //0
 					new CheckMenuItem("Always visible")), //-0
 
 					new Menu("Flow", null, //1
@@ -121,57 +107,50 @@ public class Main extends Application {
 									new CheckMenuItem("Save on Exit"), //-3
 									new SeparatorMenuItem(), //-4
 									new MenuItem("Set default window size") //-5
-					),
-					new Menu("Help", null, //4
-									new MenuItem("About"), //0
-									new MenuItem("Report an issue") //1
-					)
-	);
-	final               BooleanProperty           saveOnExit         = ((CheckMenuItem) (menuBar.getMenus().get(3)
-					.getItems().get(3))).selectedProperty();
+					), new Menu("Help", null, //4
+					new MenuItem("About"), //0
+					new MenuItem("Report an issue") //1
+	));
+	final BooleanProperty saveOnExit = ((CheckMenuItem) (menuBar.getMenus().get(3).getItems().get(3)))
+					.selectedProperty();
 	// Utility
-	final               DirectoryChooser          directoryChooser   = new DirectoryChooser();
-	final               UnaryOperator<Change>     timeFilter         = change -> {
-		if(change.getControlNewText().matches("[0-9]?[0-9]?:[0-9]?[0-9]?"))
+	final DirectoryChooser directoryChooser = new DirectoryChooser();
+	final UnaryOperator<Change> timeFilter = change -> {//TODO change anything like this to use controlsFX validation API
+		if (change.getControlNewText().matches("[0-9]?[0-9]?:[0-9]?[0-9]?"))
 			return change;
 		return null;
 	};
-	final               DateFormat                dateFormat         = new SimpleDateFormat("MM-dd-yyyy");
-	final               Date                      today              = new Date();
-	final               BorderPane                root               = new BorderPane();
-	final               Scene                     scene              = new Scene(root);
-	double      defWidth  = 1150;
-	double      defHeight = 600;
-	DebateEvent defEvent  = events.pf;
+	final DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
+	final Date today = new Date();
+	final BorderPane root = new BorderPane();
+	final Scene scene = new Scene(root);
+	double defWidth = 1150;
+	double defHeight = 600;
+	DebateEvent defEvent = events.pf;
 	// Main
-	Stage       primaryStage;
+	Stage primaryStage;
 	final Properties properties = loadProps();
-	DebateEvent currentEvent = switchEvent(defEvent);
+	DebateEvent currentEvent;
 
 	public static void main(final String[] args) {
 		launch(args);
 	}
 
-	public String formatTime(final int seconds) {
-		if((seconds % 60) >= 10)
-			return (seconds / 60) + ":" + (seconds % 60);
-		else
-			return (seconds / 60) + ":0" + (seconds % 60);
-	}
-
 	//Add more properties
 	private Properties loadProps() {
+		AppUtils.allowSave = false;
+
 		Properties props = new Properties();
 
 		try {
-			if(appHome.mkdirs())
+			if (appHome.mkdirs())
 				System.out.println("\"DebateApp\" directory created in user home");
-			if(propertiesFile.createNewFile())
+			if (propertiesFile.createNewFile())
 				System.out.println("Properties file created in \"DebateApp\" directory");
 
 			props.load(new FileInputStream(propertiesFile));
 		} catch(IOException e) {
-			showExceptionDialog(e, false);
+			AppUtils.showExceptionDialog(e);
 		}
 
 		//load size
@@ -196,6 +175,8 @@ public class Main extends Application {
 		defEvent = events.getEvent(props.getProperty("defEvent", "Public Forum"));
 
 		Platform.runLater(() -> saveOnExit.setValue(Boolean.parseBoolean(props.getProperty("saveOnExit", "false"))));
+
+		AppUtils.allowSave = true;
 
 		return props;
 	}
@@ -254,12 +235,12 @@ public class Main extends Application {
 		for(Speech s : debateEvent.getSpeeches()) {
 			Label label = new Label("Length of " + s.getName());
 			TextField field = new TextField();
-			field.setText(formatTime(s.getTimeSeconds()));
+			field.setText(AppUtils.formatTime(s.getTimeSeconds()));
 			field.setTextFormatter(new TextFormatter<Integer>(timeFilter));
 			field.textProperty().addListener((obs, oldText, newText) -> {
-				if(newText.matches("[0-9]?[0-9][0-9]?:[0-9]?[0-9][0-9]?")) {
+				if (newText.matches("[0-9]?[0-9][0-9]?:[0-9]?[0-9][0-9]?")) {
 					field.setStyle(null);
-					s.setTimeSeconds(unFormatTime(field.getText()));
+					s.setTimeSeconds(AppUtils.unFormatTime(field.getText()));
 				} else {
 					field.setStyle("-fx-background-color: indianred;");
 				}
@@ -270,13 +251,13 @@ public class Main extends Application {
 		}
 		Label label = new Label("Prep time");
 		TextField field = new TextField();
-		field.setText(formatTime(debateEvent.getPrepSeconds()));
+		field.setText(AppUtils.formatTime(debateEvent.getPrepSeconds()));
 		field.setTextFormatter(new TextFormatter<Integer>(timeFilter));
 		field.textProperty().addListener((obs, oldText, newText) -> {
-			if(newText.matches("[0-9]?[0-9][0-9]?:[0-9]?[0-9][0-9]?")) {
+			if (newText.matches("[0-9]?[0-9][0-9]?:[0-9]?[0-9][0-9]?")) {
 				field.setStyle(null);
 				editTimesDialog.getDialogPane().lookupButton(acceptButtonType).setDisable(false);
-				debateEvent.setPrepSeconds(unFormatTime(field.getText()));
+				debateEvent.setPrepSeconds(AppUtils.unFormatTime(field.getText()));
 			} else {
 				field.setStyle("-fx-background-color: indianred;");
 				editTimesDialog.getDialogPane().lookupButton(acceptButtonType).setDisable(false);
@@ -302,31 +283,29 @@ public class Main extends Application {
 
 	public void buildMenu(ObservableList<Menu> menus) {
 
-			menus.get(1).getItems().get(0).setOnAction(e -> {
-				switchSide();
-			});
+		menus.get(1).getItems().get(0).setOnAction(e -> switchSide());
 
-			menus.get(1).getItems().get(1).setOnAction(e -> saveFlow());
+		menus.get(1).getItems().get(1).setOnAction(e -> saveFlow());
 
-			menus.get(2).getItems().get(0).setOnAction(e -> {//Open tabroom
-				try {
-					openURL("www.tabroom.com");
-				} catch(IOException | URISyntaxException ex) {
-					showExceptionDialog(ex, true);
-				}
-			});
+		menus.get(2).getItems().get(0).setOnAction(e -> {//Open tabroom
+			try {
+				AppUtils.openURL("www.tabroom.com");
+			} catch (IOException | URISyntaxException ex) {
+				AppUtils.showExceptionDialog(ex);
+			}
+		});
 			menus.get(2).getItems().get(1).setOnAction(e -> {//Open NSDA
 				try {
-					openURL("www.speechanddebate.org");
+					AppUtils.openURL("www.speechanddebate.org");
 				} catch(IOException | URISyntaxException ex) {
-					showExceptionDialog(ex, true);
+					AppUtils.showExceptionDialog(ex);
 				}
 			});
 			menus.get(2).getItems().get(2).setOnAction(e -> {//Open GDrive
 				try {
-					openURL("drive.google.com");
+					AppUtils.openURL("drive.google.com");
 				} catch(IOException | URISyntaxException ex) {
-					showExceptionDialog(ex, true);
+					AppUtils.showExceptionDialog(ex);
 				}
 			});
 
@@ -351,31 +330,31 @@ public class Main extends Application {
 							(Button) bottom.getChildren().get(2)));
 
 			menus.get(4).getItems().get(0).setOnAction(e -> {//Open Github issues
-				Alert aboutAlert = new Alert(AlertType.INFORMATION, "" +
-								"DebateApp is made by Tajetaje\n" +
-								"You are currently using version " + version.toString() + "\n" +
-								"Would you like to visit the github page?", ButtonType.YES, ButtonType.NO);
+				Alert aboutAlert = new Alert(AlertType.INFORMATION,
+								"" + "DebateApp is made by Tajetaje\n" + "You are currently using version " + VERSION
+												.toString() + "\n" + "Would you like to visit the github page?", ButtonType.YES, ButtonType.NO);
 				aboutAlert.setHeaderText("About Debate App");
 				aboutAlert.setTitle("About");
 				if(aboutAlert.showAndWait().orElse(ButtonType.NO).equals(ButtonType.YES)) {
 					try {
-						openURL("https://github.com/tajetaje/DebateApp");
+						AppUtils.openURL("https://github.com/tajetaje/DebateApp");
 					} catch(IOException | URISyntaxException ex) {
-						showExceptionDialog(ex, true);
+						AppUtils.showExceptionDialog(ex);
 					}
 				}
 			});
 			menus.get(4).getItems().get(1).setOnAction(e -> {//Open Github issues
 				try {
-					openURL("https://github.com/tajetaje/DebateApp/issues/new");
+					AppUtils.openURL("https://github.com/tajetaje/DebateApp/issues/new");
 				} catch(IOException | URISyntaxException ex) {
-					showExceptionDialog(ex, true);
+					AppUtils.showExceptionDialog(ex);
 				}
 			});
 	}
 
 	@Override public void init() {
 		loadProps();
+
 
 		{//Add JMetro if windows
 			if(System.getProperty("os.name").endsWith("10")) {
@@ -468,22 +447,26 @@ public class Main extends Application {
 		primaryStage.setWidth(defWidth);
 		primaryStage.setHeight(defHeight);
 
+		currentEvent = switchEvent(defEvent);
+
 		try {
 			checkForUpdate();
-		} catch(IOException e) {
-			e.printStackTrace();
+		} catch (IOException | URISyntaxException e) {
+			AppUtils.showExceptionDialog(e);
 		}
 
 		primaryStage.show();
+
+		switchEvent(currentEvent);
 	}
 
 	@Override public void stop() throws Exception {
 		saveProps();
-		if(saveOnExit.get())
+		if (saveOnExit.get())
 			saveFlow();
 	}
 
-	private void buildFlowEditor(HBox textParent, ArrayList<String> namesList, ArrayList<TextArea> textAreas,
+	private void buildFlowEditor(HBox textParent, ArrayList<String> namesList, ArrayList<HTMLEditor> textAreas,
 					Side side) {
 		textParent.getChildren().clear();
 		textParent.prefHeightProperty().unbind();
@@ -498,8 +481,7 @@ public class Main extends Application {
 		for(Speech collectedSpeech : collectedSpeeches) {
 			Label label = new Label(collectedSpeech.getName());
 			namesList.add(collectedSpeech.getName());
-			TextArea textArea = new TextArea();
-			textArea.setWrapText(true);
+			HTMLEditor textArea = new MinimalHTMLEditor();
 			textAreas.add(textArea);
 			label.prefWidthProperty().bind(textArea.widthProperty());
 			textParent.getChildren().add(new VBox(label, textArea));
@@ -512,13 +494,14 @@ public class Main extends Application {
 						.subtract(bottom.heightProperty()));
 	}
 
-	private DebateEvent switchEvent(DebateEvent event) { //TODO use a confirmation dialog instead
-		for(TextArea textArea : proSpeechTextAreas)
-			if(! textArea.getText().isEmpty())
-				saveFlow();
-		for(TextArea textArea : conSpeechTextAreas)
-			if(! textArea.getText().isEmpty())
-				saveFlow();
+	private DebateEvent switchEvent(
+					DebateEvent event) { //TODO use a confirmation dialog instead and fix so it works with HTML editor
+		//		for(HTMLEditor textArea : proSpeechTextAreas)
+		//			if(! textArea.getHtmlText().isEmpty())
+		//				saveFlow();
+		//		for(HTMLEditor textArea : conSpeechTextAreas)
+		//			if(! textArea.getHtmlText().isEmpty())
+		//				saveFlow();
 		currentEvent = event;
 		buildFlowEditor(proFlow, proSpeechNames, proSpeechTextAreas, Side.PRO);
 		buildFlowEditor(conFlow, conSpeechNames, conSpeechTextAreas, Side.CON);
@@ -533,37 +516,13 @@ public class Main extends Application {
 		return event;
 	}
 
-	/**
-	 * Opens the given url using the client's default browser <br>
-	 * Supports <i>macOS</i>, <i>Windows</i>, and most <i>Linux</i> distros
-	 *
-	 * @param url the page to be opened
-	 * @throws IOException        if the method fails to run the browser
-	 * @throws URISyntaxException if the url is malformed
-	 * @since 1.0.0
-	 */
-	private void openURL(final String url) throws IOException, URISyntaxException {
-		final String myOS = System.getProperty("os.name").toLowerCase();
-
-		if(Desktop.isDesktopSupported()) { // Probably Windows
-			final Desktop desktop = Desktop.getDesktop();
-			desktop.browse(new URI(url));
-		} else { // Definitely Non-windows
-			final Runtime runtime = Runtime.getRuntime();
-			if(myOS.contains("mac"))
-				runtime.exec("open " + url);
-			else if(myOS.contains("nix") || myOS.contains("nux"))
-				runtime.exec("xdg-open " + url);
-		}
-	}
-
 	public void resetTimer(final int seconds, final TextField field, final Timeline timeline, final Button button) {
 		final String defaultText = "Start";
 		button.setText(defaultText);
 		field.setEditable(true);
 		field.setTextFormatter(new TextFormatter<Integer>(timeFilter));
 		field.textProperty().addListener((obs, oldText, newText) -> {
-			if(newText.matches("[0-9]?[0-9][0-9]?:[0-9]?[0-9][0-9]?")) {
+			if (newText.matches("[0-9]?[0-9][0-9]?:[0-9]?[0-9][0-9]?")) {
 				field.setStyle(null);
 			} else {
 				field.setStyle("-fx-background-color: indianred;");
@@ -573,21 +532,21 @@ public class Main extends Application {
 		button.setStyle("-fx-background-color: lightgreen;");
 
 		// update timerLabel
-		field.setText(formatTime(seconds));
+		field.setText(AppUtils.formatTime(seconds));
 		timeline.setCycleCount(Animation.INDEFINITE);
 		// KeyFrame event handler
 		timeline.getKeyFrames().clear();
 		timeline.getKeyFrames().add(new KeyFrame(Duration.seconds(1), event -> {
 			// update timerLabel
-			field.setText(formatTime(unFormatTime(field.getText()) - 1));
-			if(unFormatTime(field.getText()) <= 0) {
+			field.setText(AppUtils.formatTime(AppUtils.unFormatTime(field.getText()) - 1));
+			if (AppUtils.unFormatTime(field.getText()) <= 0) {
 				timeline.stop();
 				button.setText(defaultText);
 				field.setEditable(true);
 				((Pane) button.getParent()).setBackground(new Background(
 								new BackgroundFill(Color.RED, CornerRadii.EMPTY, Insets.EMPTY)));
 				button.getParent().setOnMouseClicked(e -> {
-					field.setText(formatTime(seconds));
+					field.setText(AppUtils.formatTime(seconds));
 					((Pane) button.getParent()).setBackground(Background.EMPTY);
 					button.getParent().setOnMouseClicked(null);
 					button.setStyle("-fx-background-color: lightgreen;");
@@ -598,7 +557,7 @@ public class Main extends Application {
 		button.setOnAction(e -> {
 			switch(timeline.getStatus()) {
 			case RUNNING:
-				if(unFormatTime(field.getText()) < 1)
+				if (AppUtils.unFormatTime(field.getText()) < 1)
 					break;
 				timeline.pause();
 				button.setStyle("-fx-background-color: lightgreen;");
@@ -606,8 +565,8 @@ public class Main extends Application {
 				field.setEditable(true);
 				break;
 			case STOPPED:
-				if(unFormatTime(field.getText()) == 0)
-					field.setText(formatTime(seconds));
+				if (AppUtils.unFormatTime(field.getText()) == 0)
+					field.setText(AppUtils.formatTime(seconds));
 				field.setEditable(false);
 				button.setStyle("-fx-background-color: ff5555;");
 				timeline.play();
@@ -619,12 +578,14 @@ public class Main extends Application {
 				button.setText("Pause");
 				break;
 			default:
-				showExceptionDialog(new IllegalStateException("Timeline is in an unhandled state."), true);
+				AppUtils.showExceptionDialog(new IllegalStateException("Timeline is in an unhandled state."));
 			}
 		});
 	}
 
 	public void saveFlow() {
+		AppUtils.allowSave = false;
+
 		boolean screenshot = false;
 		boolean csvFile = false;
 
@@ -685,10 +646,10 @@ public class Main extends Application {
 				String[] flowArray = new String[proSpeechTextAreas.size() + conSpeechNames.size()];
 				int j;
 				for(j = 0; j < proSpeechTextAreas.size(); j++) {
-					flowArray[i] = proSpeechTextAreas.get(i).getText();
+					flowArray[i] = proSpeechTextAreas.get(i).getHtmlText();
 				}
 				for(; j < proSpeechTextAreas.size() + conSpeechNames.size(); j++) {
-					flowArray[i] = conSpeechTextAreas.get(i).getText();
+					flowArray[i] = conSpeechTextAreas.get(i).getHtmlText();
 				}
 
 				w.writeAll(Collections.singletonList(namesArray));
@@ -723,132 +684,18 @@ public class Main extends Application {
 				}
 				ImageIO.write(SwingFXUtils.fromFXImage(writableConImage, null), "png", conFlowFile);
 			}
-		} catch(final IOException e) {
-			showExceptionDialog(e, false);
+		} catch (final IOException e) {
+			AppUtils.showExceptionDialog(e);
 		}
 
+		AppUtils.allowSave = false;
 	}
 
-	public void showExceptionDialog(Exception exception, boolean allowSave) {
-		Alert alert = new Alert(AlertType.ERROR);
-		alert.setTitle("Exception Dialog");
-		alert.setHeaderText("DebateApp has experienced an issue");
-		alert.setContentText(allowSave ?
-							 "To prevent unstable operation the program will close.\nIf you would like to try to save your work press \"Save\"" :
-							 "To prevent unstable operation the program will close.");
-
-		StringWriter sw = new StringWriter();
-		PrintWriter pw = new PrintWriter(sw);
-		exception.printStackTrace(pw);
-		String exceptionText = sw.toString();
-
-		Label label = new Label("The exception stacktrace was:");
-
-		TextArea textArea = new TextArea(exceptionText);
-		textArea.setEditable(false);
-		textArea.setWrapText(true);
-
-		textArea.setMaxWidth(Double.MAX_VALUE);
-		textArea.setMaxHeight(Double.MAX_VALUE);
-		GridPane.setVgrow(textArea, Priority.ALWAYS);
-		GridPane.setHgrow(textArea, Priority.ALWAYS);
-
-		GridPane expContent = new GridPane();
-		expContent.setMaxWidth(Double.MAX_VALUE);
-		expContent.add(label, 0, 0);
-		expContent.add(textArea, 0, 1);
-
-		alert.getDialogPane().setExpandableContent(expContent);
-
-		ButtonType saveButtonType = new ButtonType("Save");
-
-		alert.getButtonTypes().setAll(allowSave ? saveButtonType : null, ButtonType.CLOSE);
-
-		if(alert.showAndWait().orElse(ButtonType.CLOSE).equals(saveButtonType)) {
-			saveFlow();
-		}
-
-		Platform.exit();
+	public void checkForUpdate() throws IOException, URISyntaxException {
+		UpdateChecker checker = new UpdateChecker(new Version(1, 0, 0));
+		if (checker.check())
+			checker.showUpdateAlert();
 	}
 
-	public void checkForUpdate() throws IOException {
-
-		URLConnection connection = new URL("https://github.com/tajetaje/DebateApp/releases/latest").openConnection();
-		connection.connect();
-		InputStream connectionInputStream = connection.getInputStream();
-		Version latestVersion = new Version(connection.getURL().toExternalForm()
-						.substring(connection.getURL().toExternalForm().lastIndexOf('/') + 1));
-
-		connectionInputStream.close();
-
-		if(latestVersion.greaterThan(version)) {
-			Alert newVersionAlert = new Alert(AlertType.INFORMATION);
-			newVersionAlert.setHeaderText("A new version is available");
-			newVersionAlert.setTitle("Update message");
-			newVersionAlert.setContentText("Would you like to go to the download for version " + latestVersion + " now?");
-			newVersionAlert.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
-			if(newVersionAlert.showAndWait().orElse(ButtonType.NO).getButtonData().equals(ButtonData.YES)) {
-				try {
-					openURL("https://github.com/tajetaje/DebateApp/releases/latest");
-				} catch(IOException | URISyntaxException e) {
-					showExceptionDialog(e, true);
-				}
-			}
-		}
-	}
-
-	public int unFormatTime(final String time) {
-		int seconds;
-		if(time.endsWith(":"))
-			seconds = 0;
-		else
-			seconds = Integer.parseInt(time.substring(time.indexOf(':') + 1));
-		int minutes;
-		if(time.startsWith(":"))
-			minutes = 0;
-		else
-			minutes = Integer.parseInt(time.substring(0, time.indexOf(':')));
-		seconds += 60 * minutes;
-		return seconds;
-	}
 }
 
-class Version {
-	public final int main;
-	public final int feature;
-	public final int patch;
-
-	public Version(int main, int feature, int patch) {
-		this.main = main;
-		this.feature = feature;
-		this.patch = patch;
-	}
-
-	public Version(String versionString) {
-		main = Integer.parseInt(versionString.substring(0, versionString.indexOf('.')));
-		feature = Integer.parseInt(versionString.substring(versionString.indexOf('.')+1, versionString.lastIndexOf('.')));
-		patch = Integer.parseInt(versionString.substring(versionString.lastIndexOf('.')+1));
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if(o instanceof Version)
-			return (main==((Version) o).main && feature==((Version) o).feature && patch==((Version) o).patch);
-		else
-			return false;
-	}
-
-	public boolean greaterThan(Version v) {
-		if(main>v.main)
-			return true;
-		else if(feature>v.feature)
-			return true;
-		else
-			return patch>v.patch;
-	}
-
-	@Override
-	public String toString() {
-		return ""+main+'.'+feature+'.'+patch;
-	}
-}

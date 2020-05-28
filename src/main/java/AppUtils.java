@@ -4,11 +4,12 @@ import javafx.application.Platform;
 import javafx.beans.binding.*;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 
-import java.awt.*;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -30,9 +31,8 @@ public class AppUtils {
 	 */
 	public static void openURL(final String url) throws IOException, URISyntaxException {
 		final String myOS = System.getProperty("os.name").toLowerCase();
-
-		if (Desktop.isDesktopSupported()) { // Probably Windows
-			final Desktop desktop = Desktop.getDesktop();
+		if (myOS.contains("win")) {
+			final java.awt.Desktop desktop = java.awt.Desktop.getDesktop();
 			desktop.browse(new URI(url));
 		} else { // Definitely Non-windows
 			final Runtime runtime = Runtime.getRuntime();
@@ -40,13 +40,18 @@ public class AppUtils {
 				runtime.exec("open " + url);
 			else if (myOS.contains("nix") || myOS.contains("nux"))
 				runtime.exec("xdg-open " + url);
+			else
+				System.err.println("Unknown OS!");
 		}
 	}
 
 	public static StringExpression formattedTimeProperty(IntegerBinding seconds) {//TODO fix
 		return new When(remainderProperty(seconds, 60).greaterThanOrEqualTo(10))
-						.then(seconds.divide(60).asString().concat(":").concat(remainderProperty(seconds, 60).asString()))
-						.otherwise(seconds.divide(60).asString().concat(":0")
+						.then(seconds.divide(60).asString()
+										.concat(":")
+										.concat(remainderProperty(seconds, 60).asString()))
+						.otherwise(seconds.divide(60).asString()
+										.concat(":0")
 										.concat(remainderProperty(seconds, 60).asString()));
 	}
 
@@ -106,9 +111,9 @@ public class AppUtils {
 		exception.printStackTrace(pw);
 		String exceptionText = sw.toString();
 
-		javafx.scene.control.Label label = new javafx.scene.control.Label("The exception stacktrace was:");
+		Label label = new Label("The exception stacktrace was:");
 
-		javafx.scene.control.TextArea textArea = new TextArea(exceptionText);
+		TextArea textArea = new TextArea(exceptionText);
 		textArea.setEditable(false);
 		textArea.setWrapText(true);
 

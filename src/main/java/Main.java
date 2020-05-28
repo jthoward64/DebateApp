@@ -115,7 +115,7 @@ public class Main extends Application {
 					.selectedProperty();
 	// Utility
 	final DirectoryChooser directoryChooser = new DirectoryChooser();
-	final UnaryOperator<Change> timeFilter = change -> {//TODO change anything like this to use controlsFX validation API
+	final UnaryOperator<Change> timeFilter = change -> {
 		if (change.getControlNewText().matches("[0-9]?[0-9]?:[0-9]?[0-9]?"))
 			return change;
 		return null;

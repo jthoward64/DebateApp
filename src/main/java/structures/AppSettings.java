@@ -9,7 +9,8 @@ import java.util.Properties;
 
 public class AppSettings {
 
-	File propertiesFile;
+	public File appHome;
+	public File propertiesFile;
 
 	public final Properties properties = new Properties();
 
@@ -19,11 +20,12 @@ public class AppSettings {
 	public final HashMap<String, String> stringProperties = new HashMap<>();// s_...
 	public final HashMap<String, Enum> enumProperties = new HashMap<>();// e_...
 
-	public AppSettings(File propertiesFile) {
-		this.propertiesFile = propertiesFile;
+	public AppSettings(File appHome) {
+		this.appHome = appHome;
+		this.propertiesFile = new File(this.appHome.getPath() + File.separator + "DebateApp.properties");
 
 		try {
-			if (Main.appHome.mkdirs())
+			if (appHome.mkdirs())
 				System.out.println("\"DebateApp\" directory created in user home");
 			if (propertiesFile.createNewFile())
 				System.out.println("Properties file created in \"DebateApp\" directory");

@@ -8,8 +8,8 @@ import java.util.ArrayList;
 public class DebateEvents {
 	public final ObservableList<Speech> speeches = FXCollections.observableArrayList();
 
-	public final DebateEvent pf = new DebateEvent("Public Forum", 180);
-	public final DebateEvent ld = new DebateEvent("Lincoln-Douglas", 240);
+	public final DebateEvent pf     = new DebateEvent("Public Forum", 180);
+	public final DebateEvent ld     = new DebateEvent("Lincoln-Douglas", 240);
 	public final DebateEvent policy = new DebateEvent("Policy", 180);
 
 	private final ArrayList<DebateEvent> events = new ArrayList<>();
@@ -54,8 +54,8 @@ public class DebateEvents {
 	}
 
 	public DebateEvent getEvent(String eventName) {
-		for (DebateEvent event : events) {
-			if (eventName.equals(event.getName()))
+		for(DebateEvent event : events) {
+			if(eventName.equals(event.getName()))
 				return event;
 		}
 		return null;

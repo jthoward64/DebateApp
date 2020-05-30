@@ -13,8 +13,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 public class AppUtils {
 
@@ -25,23 +23,22 @@ public class AppUtils {
 	 * Supports <i>macOS</i>, <i>Windows</i>, and most <i>Linux</i> distros
 	 *
 	 * @param url the page to be opened
-	 * @throws IOException        if the method fails to run the browser
-	 * @throws URISyntaxException if the url is malformed
 	 * @since 1.0.0
 	 */
-	public static void openURL(final String url) throws IOException, URISyntaxException {
+	public static void openURL(final String url) {
 		final String myOS = System.getProperty("os.name").toLowerCase();
-		if (myOS.contains("win")) {
-			final java.awt.Desktop desktop = java.awt.Desktop.getDesktop();
-			desktop.browse(new URI(url));
-		} else { // Definitely Non-windows
-			final Runtime runtime = Runtime.getRuntime();
-			if (myOS.contains("mac"))
+		final Runtime runtime = Runtime.getRuntime();
+		try {
+			if(myOS.contains("win"))
+				runtime.exec("rundll32 url.dll,FileProtocolHandler " + url);
+			else if(myOS.contains("mac"))
 				runtime.exec("open " + url);
-			else if (myOS.contains("nix") || myOS.contains("nux"))
+			else if(myOS.contains("nix") || myOS.contains("nux"))
 				runtime.exec("xdg-open " + url);
 			else
 				System.err.println("Unknown OS!");
+		} catch(IOException e) {
+			showExceptionDialog(e);
 		}
 	}
 

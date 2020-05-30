@@ -9,7 +9,6 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -128,16 +127,15 @@ public class AppUtils {
 
 		ButtonType saveButtonType = new ButtonType("Save");
 
-		alert.getButtonTypes().setAll(allowSave ? saveButtonType : null, ButtonType.CLOSE);
+		if(allowSave)
+			alert.getButtonTypes().setAll(saveButtonType, ButtonType.CLOSE);
+		else
+			alert.getButtonTypes().setAll(ButtonType.CLOSE);
 
 		if (alert.showAndWait().orElse(ButtonType.CLOSE).equals(saveButtonType)) {
-			saveFlow();
+			System.out.println("Placeholder"); //TODO implement
 		}
 
 		Platform.exit();
-	}
-
-	public static void saveFlow() {
-		//TODO implement
 	}
 }

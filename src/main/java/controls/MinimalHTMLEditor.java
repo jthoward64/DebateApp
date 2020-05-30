@@ -14,7 +14,7 @@ public class MinimalHTMLEditor extends HTMLEditor {
 		minimalizeHtmlEditor(this);
 	}
 
-	public static void minimalizeHtmlEditor(final HTMLEditor editor) {
+	private void minimalizeHtmlEditor(final HTMLEditor editor) {
 		editor.setVisible(false);
 		Platform.runLater(() -> {
 			ToolBar toolBar1 = (ToolBar) editor.lookup(".top-toolbar");

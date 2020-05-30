@@ -288,25 +288,13 @@ public class Main extends Application {
 		menus.get(1).getItems().get(1).setOnAction(e -> saveFlow());
 
 		menus.get(2).getItems().get(0).setOnAction(e -> {//Open tabroom
-			try {
 				AppUtils.openURL("www.tabroom.com");
-			} catch (IOException | URISyntaxException ex) {
-				AppUtils.showExceptionDialog(ex);
-			}
 		});
 			menus.get(2).getItems().get(1).setOnAction(e -> {//Open NSDA
-				try {
 					AppUtils.openURL("www.speechanddebate.org");
-				} catch(IOException | URISyntaxException ex) {
-					AppUtils.showExceptionDialog(ex);
-				}
 			});
 			menus.get(2).getItems().get(2).setOnAction(e -> {//Open GDrive
-				try {
 					AppUtils.openURL("drive.google.com");
-				} catch(IOException | URISyntaxException ex) {
-					AppUtils.showExceptionDialog(ex);
-				}
 			});
 
 			((Menu) (menus.get(3).getItems().get(0))).getItems().get(0)
@@ -336,19 +324,11 @@ public class Main extends Application {
 				aboutAlert.setHeaderText("About Debate App");
 				aboutAlert.setTitle("About");
 				if(aboutAlert.showAndWait().orElse(ButtonType.NO).equals(ButtonType.YES)) {
-					try {
 						AppUtils.openURL("https://github.com/tajetaje/DebateApp");
-					} catch(IOException | URISyntaxException ex) {
-						AppUtils.showExceptionDialog(ex);
-					}
 				}
 			});
 			menus.get(4).getItems().get(1).setOnAction(e -> {//Open Github issues
-				try {
 					AppUtils.openURL("https://github.com/tajetaje/DebateApp/issues/new");
-				} catch(IOException | URISyntaxException ex) {
-					AppUtils.showExceptionDialog(ex);
-				}
 			});
 	}
 

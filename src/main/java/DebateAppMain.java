@@ -1,6 +1,7 @@
 package main.java;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Orientation;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -16,6 +17,8 @@ import main.java.structures.AppSettings;
 import main.java.structures.DebateEvents;
 import main.java.structures.Speech;
 import org.controlsfx.control.HiddenSidesPane;
+import org.controlsfx.control.action.Action;
+import org.controlsfx.control.action.ActionUtils;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -34,19 +37,10 @@ public class DebateAppMain extends Application {
 	final AppSettings settings = new AppSettings(new File(System.getProperty("user.home") + File.separator + ".DebateApp"));
 	final DebateEvents events = new DebateEvents();
 
-
-	//Top TODO add Action objects to these menus
-	final Menu fileMenu = new Menu("File");
-
-	final Menu editMenu = new Menu("Edit");
-
-	final Menu viewMenu = new Menu("View");
-
-	final Menu eventMenu = new Menu("Event");
-
-	final Menu helpMenu = new Menu("Help");
-
-	final MenuBar top = new MenuBar(fileMenu, editMenu, viewMenu, eventMenu, helpMenu);
+	//Bottom
+	final DebateTimer mainTimer = new DebateTimer(Orientation.HORIZONTAL, "Timer", 0);
+	final ComboBox<Speech> mainTimerSpeechSelectorBox = new ComboBox<>(); //TODO fill with speeches
+	final HBox bottom = new HBox(mainTimer, mainTimerSpeechSelectorBox);
 
 	//Center
 	final FlowEditor flowEditor = FlowEditor.parseLayoutString("[h:\"Pro Constructive\"h:\"Con Constructive\"][h:\"Con Constructive\"h:\"Pro Constructive\"]", events.pf);
@@ -55,24 +49,46 @@ public class DebateAppMain extends Application {
 	final VBox right = new VBox(conPrep);
 
 	final DebateTimer proPrep = new DebateTimer(Orientation.VERTICAL, "Pro", 180);
-	final VBox left = new VBox(proPrep);
+	final VBox left = new VBox();
 
-	final HiddenSidesPane center = new HiddenSidesPane(flowEditor, null, right, null, left);
-
-	//Bottom
-	final DebateTimer mainTimer = new DebateTimer(Orientation.HORIZONTAL, "Timer", 0);
-	final ComboBox<Speech> mainTimerSpeechSelectorBox = new ComboBox<>(); //TODO fill with speeches
-	final HBox bottom = new HBox(mainTimer, mainTimerSpeechSelectorBox);
+	final HiddenSidesPane center = new HiddenSidesPane(flowEditor, null, right, null, proPrep);
 
 
+	//Top TODO add Action objects to these menus
+	final Action saveAction = new Action("Save");
+	final Action saveAsAction = new Action("Save As");
+	final Action openAction = new Action("Open");
+	final Action exportPNG = new Action("PNG");
+	final Menu export = new Menu("Export", null, ActionUtils.createMenuItem(exportPNG));
+	final Menu fileMenu = new Menu("File",null, ActionUtils.createMenuItem(saveAction), ActionUtils.createMenuItem(saveAsAction), ActionUtils.createMenuItem(openAction), export);
+
+	final Action alwaysOnTopAction = new Action("Always on top", e -> toggleAlwaysOnTop());
+	final Action nextLayoutAction = new Action("Next Layout");
+	final Action nextPage = new Action("Next Page");
+	final Menu viewMenu = new Menu("View", null, ActionUtils.createCheckMenuItem(alwaysOnTopAction));
+
+	final Menu eventMenu = new Menu("Event");
+
+	final Action openNsdaAction = new Action("NSDA", e -> AppUtils.openURL("https://www.speechanddebate.org"));
+	final Action openTabroomAction = new Action("Tabroom", e -> AppUtils.openURL("https://www.tabroom.com"));
+	final Action openDriveAction = new Action("Google Drive", e -> AppUtils.openURL("https://drive.google.com/drive"));
+	final Menu linksMenu = new Menu("Links", null, ActionUtils.createMenuItem(openNsdaAction), ActionUtils.createMenuItem(openTabroomAction), ActionUtils.createMenuItem(openDriveAction));
+
+	final Menu helpMenu = new Menu("Help");
+
+	final MenuBar top = new MenuBar(fileMenu, linksMenu, viewMenu, eventMenu, helpMenu);
+
+	//root layout
 	final BorderPane root = new BorderPane(center, top, null, bottom, null);
 	final Scene           mainScene = new Scene(root);
+	Stage mainStage;
 
 	public static void main(String[] args) {
 		launch(args);
 	}
 
 	@Override public void init() throws Exception {
+		System.out.println(center.getTriggerDistance());
 		//OS specific code
 		final String myOS = System.getProperty("os.name").toLowerCase();
 		if (myOS.contains("win")) {//Windows
@@ -108,8 +124,13 @@ public class DebateAppMain extends Application {
 	}
 
 	@Override public void start(Stage mainStage) {
+		this.mainStage = mainStage;
 		mainStage.setScene(mainScene);
 
 		mainStage.show();
+	}
+
+	private void toggleAlwaysOnTop() {
+		Platform.runLater(() -> mainStage.setAlwaysOnTop(!mainStage.isAlwaysOnTop()));
 	}
 }

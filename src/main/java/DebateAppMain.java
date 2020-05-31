@@ -2,17 +2,19 @@ package main.java;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.image.Image;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import jfxtras.styles.jmetro.JMetro;
 import jfxtras.styles.jmetro.Style;
 import main.java.controls.FlowEditor;
 import main.java.controls.DebateTimer;
+import main.java.controls.SettingsEditor;
 import main.java.structures.AppSettings;
 import main.java.structures.DebateEvents;
 import main.java.structures.Speech;
@@ -21,9 +23,8 @@ import org.controlsfx.control.action.Action;
 import org.controlsfx.control.action.ActionUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
-
-//TODO refactor and add settings to PropertySheet controls **
 
 /**
  * <div>App icon made by <a href="https://www.flaticon.com/authors/freepik" title=
@@ -33,9 +34,8 @@ import java.nio.file.Files;
  * @author Tag Howard
  */
 public class DebateAppMain extends Application {
-
-	final AppSettings settings = new AppSettings(new File(System.getProperty("user.home") + File.separator + ".DebateApp"));
-	final DebateEvents events = new DebateEvents();
+	final AppSettings settings = new AppSettings(new File(AppUtils.getAppHome()));
+	final DebateEvents events = settings.debateEvents;
 
 	//Bottom
 	final DebateTimer mainTimer = new DebateTimer(Orientation.HORIZONTAL, "Timer", 0);
@@ -43,18 +43,19 @@ public class DebateAppMain extends Application {
 	final HBox bottom = new HBox(mainTimer, mainTimerSpeechSelectorBox);
 
 	//Center
-	final FlowEditor flowEditor = FlowEditor.parseLayoutString("[h:\"Pro Constructive\"h:\"Con Constructive\"][h:\"Con Constructive\"h:\"Pro Constructive\"]", events.pf);
+	final FlowEditor flowEditor = FlowEditor.parseLayoutString("[h:1h:3h:5h:7][h:2h:4h:6h:8]", events.pf);
 
 	final DebateTimer conPrep = new DebateTimer(Orientation.VERTICAL, "Con", 180);
 	final VBox right = new VBox(conPrep);
 
+
 	final DebateTimer proPrep = new DebateTimer(Orientation.VERTICAL, "Pro", 180);
-	final VBox left = new VBox();
+	final VBox left = new VBox(proPrep);
 
-	final HiddenSidesPane center = new HiddenSidesPane(flowEditor, null, right, null, proPrep);
+	final HiddenSidesPane center = new HiddenSidesPane(flowEditor, null, right, null, left); //TODO fix the bug where clicking the TextField will close the pane (use a property binding?)
 
 
-	//Top TODO add Action objects to these menus
+	//Top TODO implement save, open, and export
 	final Action saveAction = new Action("Save");
 	final Action saveAsAction = new Action("Save As");
 	final Action openAction = new Action("Open");
@@ -64,10 +65,10 @@ public class DebateAppMain extends Application {
 
 	final Action alwaysOnTopAction = new Action("Always on top", e -> toggleAlwaysOnTop());
 	final Action nextLayoutAction = new Action("Next Layout");
-	final Action nextPage = new Action("Next Page");
-	final Menu viewMenu = new Menu("View", null, ActionUtils.createCheckMenuItem(alwaysOnTopAction));
+	final Action nextPage = new Action("Next Page", e -> flowEditor.nextPage());
+	final Menu viewMenu = new Menu("View", null, ActionUtils.createCheckMenuItem(alwaysOnTopAction), ActionUtils.createMenuItem(nextLayoutAction), ActionUtils.createMenuItem(nextPage));
 
-	final Menu eventMenu = new Menu("Event");
+	final Menu eventMenu = new Menu("Event");//TODO add event switching and times editor
 
 	final Action openNsdaAction = new Action("NSDA", e -> AppUtils.openURL("https://www.speechanddebate.org"));
 	final Action openTabroomAction = new Action("Tabroom", e -> AppUtils.openURL("https://www.tabroom.com"));
@@ -76,7 +77,7 @@ public class DebateAppMain extends Application {
 
 	final Menu helpMenu = new Menu("Help");
 
-	final MenuBar top = new MenuBar(fileMenu, linksMenu, viewMenu, eventMenu, helpMenu);
+	final MenuBar top = new MenuBar(fileMenu, linksMenu, viewMenu, eventMenu, helpMenu); //TODO add keybindings
 
 	//root layout
 	final BorderPane root = new BorderPane(center, top, null, bottom, null);
@@ -88,12 +89,13 @@ public class DebateAppMain extends Application {
 	}
 
 	@Override public void init() throws Exception {
-		System.out.println(center.getTriggerDistance());
+		settings.load();
+
 		//OS specific code
 		final String myOS = System.getProperty("os.name").toLowerCase();
 		if (myOS.contains("win")) {//Windows
 			System.out.println("OS detected as Windows");
-		 	Files.setAttribute(settings.propertiesFile.toPath(), "dos:hidden", true);
+		 	Files.setAttribute(new File(AppUtils.getAppHome()).toPath(), "dos:hidden", true);
 			if(System.getProperty("os.name").endsWith("10")) {
 				final JMetro jmetro = new JMetro(Style.LIGHT);
 				jmetro.setScene(mainScene);
@@ -113,8 +115,10 @@ public class DebateAppMain extends Application {
 
 		//Configure center
 		////Configure left slide-out
+		left.setBackground(new Background(new BackgroundFill(Color.DARKGRAY, new CornerRadii(20), Insets.EMPTY)));
 
 		////Configure right slide-out
+		right.setBackground(new Background(new BackgroundFill(Color.DARKGRAY, new CornerRadii(5), Insets.EMPTY)));
 
 		////Configure flow editor
 
@@ -127,7 +131,23 @@ public class DebateAppMain extends Application {
 		this.mainStage = mainStage;
 		mainStage.setScene(mainScene);
 
+		mainStage.setTitle("Debate App");
+		mainStage.getIcons().addAll(new Image(getClass().getResourceAsStream("/speaker128.png")),
+						new Image(getClass().getResourceAsStream("/speaker64.png")),
+						new Image(getClass().getResourceAsStream("/speaker32.png")),
+						new Image(getClass().getResourceAsStream("/speaker16.png")));
+
+		mainStage.setMinWidth(850);
+		mainStage.setMinHeight(400);
+		mainStage.setWidth(settings.defaultWidth.getValue());
+		mainStage.setHeight(settings.defaultHeight.getValue());
+
+
 		mainStage.show();
+	}
+
+	@Override public void stop() throws IOException {
+		settings.save();
 	}
 
 	private void toggleAlwaysOnTop() {

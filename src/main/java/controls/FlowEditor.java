@@ -1,5 +1,12 @@
 package main.java.controls;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.binding.DoubleExpression;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -13,9 +20,22 @@ import java.util.IllegalFormatException;
 import java.util.stream.Collectors;
 
 public class FlowEditor extends Pane {
-	private final HBox[] flowEditorPages;
-	private int currentPage = 0;
-	public final HashMap<Speech, MinimalHTMLEditor> editorHashMap = new HashMap<>();
+	private final HBox[]                             flowEditorPages;
+	private final IntegerProperty                    currentPage   = new SimpleIntegerProperty(0);
+	public final  HashMap<Speech, MinimalHTMLEditor> editorHashMap = new HashMap<>();
+
+	private final DoubleExpression editorWidthExpression = new DoubleExpression() {
+		@Override public double get() {
+			if(flowEditorPages.length>=1)
+				return getWidth()/flowEditorPages.length;
+			else
+				return 0;
+		}
+		@Override public void addListener(ChangeListener<? super Number> changeListener) {}
+		@Override public void removeListener(ChangeListener<? super Number> changeListener) {}
+		@Override public void addListener(InvalidationListener invalidationListener) {}
+		@Override public void removeListener(InvalidationListener invalidationListener) {}
+	};
 
 	private FlowEditor(HBox[] flowEditorPages) {
 		this.flowEditorPages = flowEditorPages;
@@ -23,14 +43,14 @@ public class FlowEditor extends Pane {
 
 	public void setPage(int pageIndex) {
 		getChildren().setAll(flowEditorPages[pageIndex]);
-		currentPage = pageIndex;
+		currentPage.set(pageIndex);
 	}
 
 	public void nextPage() {
-		if(currentPage==flowEditorPages.length-1)
+		if(currentPage.get()==flowEditorPages.length-1)
 			setPage(0);
 		else
-			setPage(currentPage+1);
+			setPage(currentPage.get()+1);
 	}
 
 	/**
@@ -38,8 +58,8 @@ public class FlowEditor extends Pane {
 	 * List of valid schema and their meanings:<br>
 	 * <table style="width:100%">
 	 *   <tr>
-	 *     <td>h:"Name"</td>
-	 *     <td>An HTMLEditors associated with a speech called Name, name MUST match a speech in event</td>
+	 *     <td>h:index</td>
+	 *     <td>An HTMLEditors associated with a speech of index "index", "index" MUST match a speech at that index in the speeches arraylist as defined in the event</td>
 	 *   </tr>
 	 *   <tr>
 	 *     <td>[...]</td>
@@ -57,7 +77,6 @@ public class FlowEditor extends Pane {
 	 */
 	public static FlowEditor parseLayoutString(String layoutString, DebateEvent event) throws IllegalFormatException {
 		FlowEditor editor = new FlowEditor(new HBox[(int) layoutString.chars().filter(value -> value=='[').count()]);
-		System.out.println(editor.flowEditorPages.length);
 
 		StringBuilder layoutStringBuilder = new StringBuilder(layoutString);
 		for(int i = 0; i<editor.flowEditorPages.length; i++) {
@@ -78,18 +97,22 @@ public class FlowEditor extends Pane {
 	 */
 	private static HBox parseHBoxString(FlowEditor editor, String hBoxString, DebateEvent event) {
 		HBox box = new HBox();
+		box.prefHeightProperty().bind(editor.heightProperty());
+		box.prefWidthProperty().bind(editor.widthProperty());
 		StringBuilder hBoxStringBuilder = new StringBuilder(hBoxString);
 		while(hBoxStringBuilder.length()>0) {
-			if(hBoxStringBuilder.indexOf("h:\"")==0) {
-				hBoxStringBuilder.delete(0,3);
-				System.out.println(hBoxStringBuilder.toString());
-				int endIndex = hBoxStringBuilder.indexOf("\"");
-				Speech speech = event.getSpeeches().stream().filter(e -> e.getName().equalsIgnoreCase(hBoxStringBuilder.substring(0, endIndex))).collect(
-								Collectors.toList()).get(0);
+			if(hBoxStringBuilder.indexOf("h:")==0) {
+				hBoxStringBuilder.delete(0,2);
+				int endIndex = hBoxStringBuilder.indexOf("h");
+				if(endIndex==-1) endIndex=hBoxStringBuilder.length();
+				Speech speech = event.getSpeeches().get(Integer.parseInt(hBoxStringBuilder.substring(0, endIndex)));
 				MinimalHTMLEditor htmlEditor = new MinimalHTMLEditor();
+				Label label = new Label(speech.getName());
+				htmlEditor.prefHeightProperty().bind(editor.heightProperty().subtract(label.heightProperty()));
+				htmlEditor.prefWidthProperty().bind(editor.editorWidthExpression);
 				editor.editorHashMap.put(speech, htmlEditor);
-				box.getChildren().add(new VBox(new Label(speech.getName()), htmlEditor));
-				hBoxStringBuilder.delete(0, endIndex+1);
+				box.getChildren().add(new VBox(label, htmlEditor));
+				hBoxStringBuilder.delete(0, endIndex);
 			}
 		}
 		return box;

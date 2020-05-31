@@ -45,9 +45,6 @@ public class DebateTimer extends Region {
 	ValidationSupport validationSupport = new ValidationSupport();
 
 	public DebateTimer(Orientation orientation, String labelText, int defaultTime) {
-		//		timerField.setOnAction(e -> System.out.println(AppUtils.unFormattedTimeProperty(
-		//						(StringBinding) timerField.textProperty().concat(""))));
-
 		Pane box;
 		if (orientation.equals(Orientation.VERTICAL)) {
 			box = new VBox();
@@ -62,9 +59,7 @@ public class DebateTimer extends Region {
 
 		this.defaultTime=defaultTime;
 
-		validationSupport.registerValidator(timerField, false,
-						Validator.createRegexValidator("Invalid time", "[0-9]?[0-9][0-9]?:[0-9]?[0-9][0-9]?",
-										Severity.ERROR));
+		validationSupport.registerValidator(timerField, false, AppUtils.timeValidator);
 		button.disableProperty().bind(validationSupport.invalidProperty());
 
 		resetTimer(defaultTime);

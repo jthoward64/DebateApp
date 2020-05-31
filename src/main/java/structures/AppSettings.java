@@ -1,7 +1,13 @@
 package main.java.structures;
 
+import javafx.application.Platform;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import main.java.AppUtils;
 import main.java.Main;
+import org.controlsfx.control.PropertySheet;
 
 import java.io.*;
 import java.util.HashMap;
@@ -9,16 +15,21 @@ import java.util.Properties;
 
 public class AppSettings {
 
-	public File appHome;
+	public File appHome;//These should probably be made user definable eventually
 	public File propertiesFile;
 
 	public final Properties properties = new Properties();
 
-	public final HashMap<String, Boolean> boolProperties = new HashMap<>();// b_...
-	public final HashMap<String, Integer> intProperties = new HashMap<>();// i_...
-	public final HashMap<String, Double> doubleProperties = new HashMap<>();// d_...
-	public final HashMap<String, String> stringProperties = new HashMap<>();// s_...
-	public final HashMap<String, Enum> enumProperties = new HashMap<>();// e_...
+	public final DebateEvents debateEvents = new DebateEvents();
+
+	public final SimpleBooleanProperty saveOnExit = new SimpleBooleanProperty(false);
+
+	public final SimpleDoubleProperty defaultWidth = new SimpleDoubleProperty();
+	public final SimpleDoubleProperty defaultHeight = new SimpleDoubleProperty();
+
+	public final SimpleObjectProperty<DebateEvent> defaultEvent = new SimpleObjectProperty<>(debateEvents.pf);
+
+	//TODO move some more hardcoded values here
 
 	public AppSettings(File appHome) {
 		this.appHome = appHome;
@@ -37,66 +48,60 @@ public class AppSettings {
 	}
 
 	public void load() throws IOException {
+		AppUtils.allowSave = false;
 		properties.load(new FileInputStream(propertiesFile));
-		properties.forEach( (k, v) -> {
-			String key = (String) k;
 
-			if(key.startsWith("b_")) {
-				boolProperties.put(key.substring(key.indexOf('_')-1), Boolean.valueOf((String) v));
-			}
-			else if(key.startsWith("i_")) {
-				intProperties.put(key.substring(key.indexOf('_')-1), Integer.valueOf((String) v));
-			}
-			else if(key.startsWith("d_")) {
-				doubleProperties.put(key.substring(key.indexOf('_')-1), Double.valueOf((String) v));
-			}
-			else if(key.startsWith("s_")) {
-				stringProperties.put(key.substring(key.indexOf('_')-1), (String) v);
-			}
-			else if(key.startsWith("e_")) {//TODO find some way to load enums dynamically
-				key=key.substring(key.indexOf('_')-1);
-				if(key.startsWith("Side_")) {
-					enumProperties.put(key.substring(key.indexOf('_')-1), Side.valueOf((String) v));
-				}
-				else {
-					System.err.println("Invalid enum data in properties file at: "+key+": "+ v);
-					System.out.println("Invalid enum data will be ignored on next save");
-				}
-			}
-			else {
-				System.err.println("Invalid data in properties file at: "+key+": "+ v);
-				System.out.println("Invalid data will be ignored on next save");
-			}
-		});
+		//load size
+		defaultWidth.setValue(Double.parseDouble(properties.getProperty("defaultWidth", String.valueOf(defaultWidth.get()))));
+		defaultHeight.setValue(Double.parseDouble(properties.getProperty("defaultHeight", String.valueOf(defaultWidth.get()))));
+
+		//load times
+		debateEvents.pf.setTimesFromString(properties.getProperty("pfTimes", "240,240,240,240,180,180,180,120,120,"));
+		debateEvents.ld.setTimesFromString(properties.getProperty("ldTimes", "360,420,180,240,360,180,"));
+		debateEvents.policy.setTimesFromString(properties.getProperty("policyTimes", "480,480,180,480,480,300,300,300,300,"));
+
+		//load prep times
+		debateEvents.pf.setPrepSeconds(Integer.parseInt(properties.getProperty("pfPrep", "180")));
+		debateEvents.ld.setPrepSeconds(Integer.parseInt(properties.getProperty("ldPrep", "240")));
+		debateEvents.policy.setPrepSeconds(Integer.parseInt(properties.getProperty("policyPrep", "300")));
+
+		//load default event
+		defaultEvent.setValue(debateEvents.getEvent(properties.getProperty("defEvent", "Public Forum")));
+
+		saveOnExit.setValue(Boolean.parseBoolean(properties.getProperty("saveOnExit", "false")));
+
+		AppUtils.allowSave = true;
 	}
 
 	public void save() throws IOException {
+		AppUtils.allowSave = false;
 
-		boolProperties.forEach( (k, v) -> {
-			String key= "b_"+ k;
-			String value = v.toString();
-			properties.put(key, value);
-		});
-		intProperties.forEach( (k, v) -> {
-			String key= "n_"+ k;
-			String value = v.toString();
-			properties.put(key, value);
-		});
-		doubleProperties.forEach( (k, v) -> {
-			String key= "n_"+ k;
-			String value = v.toString();
-			properties.put(key, value);
-		});
-		stringProperties.forEach( (k, value) -> {
-			String key= "s_"+ k;
-			properties.put(key, value);
-		});
-		enumProperties.forEach( (k, v) -> {
-			String key= "e_" + v.getClass().getSimpleName() + "_" + k;
-			String value = v.toString();
-			properties.put(key, value);
-		});
+		if(appHome.mkdirs())
+			System.out.println("\"DebateApp\" directory created in user home");
+		if(propertiesFile.createNewFile())
+			System.out.println("Properties file created in \"DebateApp\" directory");
+
+		//save size
+		properties.setProperty("defaultWidth", String.valueOf(defaultWidth.get()));
+		properties.setProperty("defaultHeight", String.valueOf(defaultHeight.get()));
+
+		//save times
+		properties.setProperty("pfTimes", debateEvents.pf.getTimes());
+		properties.setProperty("ldTimes", debateEvents.ld.getTimes());
+		properties.setProperty("policyTimes", debateEvents.policy.getTimes());
+
+		//save prep times
+		properties.setProperty("pfPrep", String.valueOf(debateEvents.pf.getPrepSeconds()));
+		properties.setProperty("ldPrep", String.valueOf(debateEvents.ld.getPrepSeconds()));
+		properties.setProperty("policyPrep", String.valueOf(debateEvents.policy.getPrepSeconds()));
+
+		//Save default event
+		properties.setProperty("defEvent", defaultEvent.get().getName());
+
+		//Save saveOnExit
+		properties.setProperty("saveOnExit", String.valueOf(saveOnExit.get()));
 
 		properties.store(new FileOutputStream(propertiesFile), "Configuration for tajetaje's DebateApp");
+		AppUtils.allowSave = true;
 	}
 }

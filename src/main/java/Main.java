@@ -1,7 +1,5 @@
 package main.java;
 
-//TODO delete
-
 import com.opencsv.CSVWriter;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -35,6 +33,7 @@ import javafx.util.Pair;
 import jfxtras.styles.jmetro.JMetro;
 import jfxtras.styles.jmetro.Style;
 import main.java.controls.MinimalHTMLEditor;
+import main.java.controls.SpeechTimesDialog;
 import main.java.structures.*;
 
 import javax.imageio.ImageIO;
@@ -211,72 +210,10 @@ public class Main extends Application {
 	}
 
 	public void showEditTimesDialog(DebateEvent debateEvent) {
-		final String oldTimes = debateEvent.getTimes();
-
-		//Create dialog
-		Dialog<ButtonType> editTimesDialog = new Dialog<>();
-		ButtonType acceptButtonType = new ButtonType("Accept", ButtonData.OK_DONE);
-		ButtonType revertButtonType = new ButtonType("Revert", ButtonData.CANCEL_CLOSE);
-		ButtonType defaultButtonType = new ButtonType("Default", ButtonData.OTHER);
-		editTimesDialog.getDialogPane().getButtonTypes().setAll(acceptButtonType, revertButtonType, defaultButtonType);
-		GridPane speechesGrid = new GridPane();
-		speechesGrid.setHgap(5);
-		Region topSpacer = new Region();
-		topSpacer.setPrefHeight(10);
-		Region bottomSpacer = new Region();
-		bottomSpacer.setPrefHeight(5);
-		VBox mainBox = new VBox(new Label("Fields in red are invalid and will not be saved"), topSpacer,
-						new Separator(Orientation.HORIZONTAL), bottomSpacer, speechesGrid);
-		editTimesDialog.setHeaderText("Customize speech times");
-		editTimesDialog.getDialogPane().setContent(mainBox);
-
-		//fill the speeches box
-		int i = 0;
-		for(Speech s : debateEvent.getSpeeches()) {
-			Label label = new Label("Length of " + s.getName());
-			TextField field = new TextField();
-			field.setText(AppUtils.formatTime(s.getTimeSeconds()));
-			field.setTextFormatter(new TextFormatter<Integer>(timeFilter));
-			field.textProperty().addListener((obs, oldText, newText) -> {
-				if (newText.matches("[0-9]?[0-9][0-9]?:[0-9]?[0-9][0-9]?")) {
-					field.setStyle(null);
-					s.setTimeSeconds(AppUtils.unFormatTime(field.getText()));
-				} else {
-					field.setStyle("-fx-background-color: indianred;");
-				}
-			});
-			speechesGrid.add(label, 0, i);
-			speechesGrid.add(field, 1, i);
-			i++;
-		}
-		Label label = new Label("Prep time");
-		TextField field = new TextField();
-		field.setText(AppUtils.formatTime(debateEvent.getPrepSeconds()));
-		field.setTextFormatter(new TextFormatter<Integer>(timeFilter));
-		field.textProperty().addListener((obs, oldText, newText) -> {
-			if (newText.matches("[0-9]?[0-9][0-9]?:[0-9]?[0-9][0-9]?")) {
-				field.setStyle(null);
-				editTimesDialog.getDialogPane().lookupButton(acceptButtonType).setDisable(false);
-				debateEvent.setPrepSeconds(AppUtils.unFormatTime(field.getText()));
-			} else {
-				field.setStyle("-fx-background-color: indianred;");
-				editTimesDialog.getDialogPane().lookupButton(acceptButtonType).setDisable(false);
-			}
-		});
-		speechesGrid.add(label, 0, i);
-		speechesGrid.add(field, 1, i);
+		SpeechTimesDialog editTimesDialog = new SpeechTimesDialog(debateEvent);
 
 		//Show Dialog
-		switch(editTimesDialog.showAndWait().orElse(ButtonType.CANCEL).getButtonData()) {
-		case OK_DONE:
-			break;
-		case OTHER:
-			debateEvent.setTimesFromString(debateEvent.getDefaultTimes());
-			break;
-		default:
-			debateEvent.setTimesFromString(oldTimes);
-			break;
-		}
+		debateEvent.setTimesFromString(editTimesDialog.showAndWait().orElse(debateEvent.getTimes()));
 
 		switchEvent(debateEvent);
 	}
@@ -475,13 +412,13 @@ public class Main extends Application {
 	}
 
 	private DebateEvent switchEvent(
-					DebateEvent event) { //TODO use a confirmation dialog instead and fix so it works with HTML editor
-		//		for(HTMLEditor textArea : proSpeechTextAreas)
-		//			if(! textArea.getHtmlText().isEmpty())
-		//				saveFlow();
-		//		for(HTMLEditor textArea : conSpeechTextAreas)
-		//			if(! textArea.getHtmlText().isEmpty())
-		//				saveFlow();
+					DebateEvent event) {
+				for(HTMLEditor textArea : proSpeechTextAreas)
+					if(! textArea.getHtmlText().isEmpty())
+						saveFlow();
+				for(HTMLEditor textArea : conSpeechTextAreas)
+					if(! textArea.getHtmlText().isEmpty())
+						saveFlow();
 		currentEvent = event;
 		buildFlowEditor(proFlow, proSpeechNames, proSpeechTextAreas, Side.PRO);
 		buildFlowEditor(conFlow, conSpeechNames, conSpeechTextAreas, Side.CON);

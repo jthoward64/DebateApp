@@ -8,7 +8,10 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
+import org.controlsfx.validation.Severity;
+import org.controlsfx.validation.Validator;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -16,6 +19,8 @@ import java.io.StringWriter;
 public class AppUtils {
 
 	public static boolean allowSave = true;
+	public static Validator<String> timeValidator = Validator.createRegexValidator("Invalid time", "[0-9]{1,2}:[0-9]{1,2}",
+	Severity.ERROR);
 
 	/**
 	 * Opens the given url using the client's default browser <br>
@@ -39,33 +44,6 @@ public class AppUtils {
 		} catch(IOException e) {
 			showExceptionDialog(e);
 		}
-	}
-
-	public static StringExpression formattedTimeProperty(IntegerBinding seconds) {//TODO fix
-		return new When(remainderProperty(seconds, 60).greaterThanOrEqualTo(10))
-						.then(seconds.divide(60).asString()
-										.concat(":")
-										.concat(remainderProperty(seconds, 60).asString()))
-						.otherwise(seconds.divide(60).asString()
-										.concat(":0")
-										.concat(remainderProperty(seconds, 60).asString()));
-	}
-
-	public static IntegerBinding unFormattedTimeProperty(StringBinding time) {//TODO fix
-		return Bindings.createIntegerBinding(() -> {
-			int seconds;
-			if (time.get().endsWith(":"))
-				seconds = 0;
-			else
-				seconds = Integer.parseInt(time.get().substring(time.get().indexOf(':') + 1));
-			int minutes;
-			if (time.get().startsWith(":"))
-				minutes = 0;
-			else
-				minutes = Integer.parseInt(time.get().substring(0, time.get().indexOf(':')));
-			seconds += 60 * minutes;
-			return seconds;
-		}, time);
 	}
 
 	public static IntegerBinding remainderProperty(IntegerBinding value, int divisor) {
@@ -137,5 +115,14 @@ public class AppUtils {
 		}
 
 		Platform.exit();
+	}
+
+	public static String getAppHome() {
+		final String myOS = System.getProperty("os.name").toLowerCase();
+			if(myOS.contains("mac") || myOS.contains("nix") || myOS.contains("nux"))
+				return System.getProperty("user.home") + File.separator + ".DebateApp";
+			else
+				return System.getProperty("user.home") + File.separator + "DebateApp";
+
 	}
 }

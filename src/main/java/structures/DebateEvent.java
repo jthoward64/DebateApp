@@ -2,7 +2,7 @@ package main.java.structures;
 
 import java.util.ArrayList;
 
-public class DebateEvent {
+public class DebateEvent { //TODO add and somehow save layout strings to this class (or maybe in settings?)
 	private final String name;
 	private final ArrayList<Speech> speeches = new ArrayList<>();
 	private int prepSeconds;
@@ -59,6 +59,11 @@ public class DebateEvent {
 			}
 		} else
 			System.err.println("Wrong number of times for this event");
+	}
+
+	@Override
+	public String toString() {
+		return getName();
 	}
 }
 

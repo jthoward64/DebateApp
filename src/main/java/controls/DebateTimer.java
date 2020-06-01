@@ -27,7 +27,7 @@ public class DebateTimer extends Region {
 
 	private final Timeline  timerTimeline = new Timeline();
 	private final TextField timerField    = new TextField();
-	private final Button    button        = new Button();
+	private final Button button = new Button();
 
 	private boolean timerRunning = false;
 	public final BooleanExpression timerRunningProperty = new BooleanExpression() {
@@ -144,5 +144,13 @@ public class DebateTimer extends Region {
 			button.getParent().setOnMouseClicked(null);
 			button.setStyle("-fx-background-color: lightgreen;");
 		});
+	}
+
+	public Button getButton() {
+		return button;
+	}
+
+	public TextField getField() {
+		return timerField;
 	}
 }

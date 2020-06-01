@@ -11,6 +11,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.web.HTMLEditor;
 import main.java.structures.DebateEvent;
 import main.java.structures.Speech;
 
@@ -107,6 +108,7 @@ public class FlowEditor extends Pane {
 				if(endIndex==-1) endIndex=hBoxStringBuilder.length();
 				Speech speech = event.getSpeeches().get(Integer.parseInt(hBoxStringBuilder.substring(0, endIndex)));
 				MinimalHTMLEditor htmlEditor = new MinimalHTMLEditor();
+				htmlEditor.minimalizeHtmlEditor();
 				Label label = new Label(speech.getName());
 				htmlEditor.prefHeightProperty().bind(editor.heightProperty().subtract(label.heightProperty()));
 				htmlEditor.prefWidthProperty().bind(editor.editorWidthExpression);

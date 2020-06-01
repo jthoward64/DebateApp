@@ -2,22 +2,27 @@ package main.java;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
+import javafx.geometry.Side;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import jfxtras.styles.jmetro.JMetro;
 import jfxtras.styles.jmetro.Style;
-import main.java.controls.FlowEditor;
 import main.java.controls.DebateTimer;
-import main.java.controls.SettingsEditor;
+import main.java.controls.FlowEditor;
 import main.java.structures.AppSettings;
+import main.java.structures.DebateEvent;
 import main.java.structures.DebateEvents;
 import main.java.structures.Speech;
+import org.apache.commons.text.StringEscapeUtils;
 import org.controlsfx.control.HiddenSidesPane;
 import org.controlsfx.control.action.Action;
 import org.controlsfx.control.action.ActionUtils;
@@ -36,6 +41,7 @@ import java.nio.file.Files;
 public class DebateAppMain extends Application {
 	final AppSettings settings = new AppSettings(new File(AppUtils.getAppHome()));
 	final DebateEvents events = settings.debateEvents;
+	SimpleObjectProperty<DebateEvent> currentEvent = new SimpleObjectProperty<>(events.pf);
 
 	//Bottom
 	final DebateTimer mainTimer = new DebateTimer(Orientation.HORIZONTAL, "Timer", 0);
@@ -52,7 +58,7 @@ public class DebateAppMain extends Application {
 	final DebateTimer proPrep = new DebateTimer(Orientation.VERTICAL, "Pro", 180);
 	final VBox left = new VBox(proPrep);
 
-	final HiddenSidesPane center = new HiddenSidesPane(flowEditor, null, right, null, left); //TODO fix the bug where clicking the TextField will close the pane (use a property binding?)
+	final HiddenSidesPane center = new HiddenSidesPane(flowEditor, null, right, null, left);
 
 
 	//Top TODO implement save, open, and export
@@ -111,14 +117,29 @@ public class DebateAppMain extends Application {
 				System.err.println("Unknown OS!");
 		}
 
+		//Backend configuration
+		//--------------------
+		currentEvent.addListener((observableValue, oldEvent, newEvent) -> {
+
+		});
+
+		//Frontend configuration
+		//----------------------
+
 		//Configure menu
 
 		//Configure center
 		////Configure left slide-out
 		left.setBackground(new Background(new BackgroundFill(Color.DARKGRAY, new CornerRadii(20), Insets.EMPTY)));
+		proPrep.getButton().setOnMouseClicked(e -> center.show(Side.LEFT));
+		proPrep.getField().setOnMouseClicked(e -> center.show(Side.LEFT));
+		left.setOnMouseClicked(e -> center.setPinnedSide(center.getPinnedSide()==null ? Side.LEFT : null));
 
 		////Configure right slide-out
-		right.setBackground(new Background(new BackgroundFill(Color.DARKGRAY, new CornerRadii(5), Insets.EMPTY)));
+		right.setBackground(new Background(new BackgroundFill(Color.DARKGRAY, new CornerRadii(20), Insets.EMPTY)));
+		conPrep.getButton().setOnMouseClicked(e -> center.show(Side.RIGHT));
+		conPrep.getField().setOnMouseClicked(e -> center.show(Side.RIGHT));
+		right.setOnMouseClicked(e -> center.setPinnedSide(center.getPinnedSide()==null ? Side.RIGHT : null));
 
 		////Configure flow editor
 
@@ -148,6 +169,7 @@ public class DebateAppMain extends Application {
 
 	@Override public void stop() throws IOException {
 		settings.save();
+		System.out.println(StringEscapeUtils.unescapeHtml4(flowEditor.editorHashMap.get(currentEvent.get().getSpeeches().get(1)).getHtmlText()));
 	}
 
 	private void toggleAlwaysOnTop() {

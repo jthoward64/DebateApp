@@ -398,7 +398,8 @@ public class Main extends Application {
 		for(Speech collectedSpeech : collectedSpeeches) {
 			Label label = new Label(collectedSpeech.getName());
 			namesList.add(collectedSpeech.getName());
-			HTMLEditor textArea = new MinimalHTMLEditor();
+			MinimalHTMLEditor textArea = new MinimalHTMLEditor();
+			textArea.minimalizeHtmlEditor();
 			textAreas.add(textArea);
 			label.prefWidthProperty().bind(textArea.widthProperty());
 			textParent.getChildren().add(new VBox(label, textArea));
@@ -414,10 +415,10 @@ public class Main extends Application {
 	private DebateEvent switchEvent(
 					DebateEvent event) {
 				for(HTMLEditor textArea : proSpeechTextAreas)
-					if(! textArea.getHtmlText().isEmpty())
+					if(! textArea.getHtmlText().equals("<html dir=\"ltr\"><head></head><body contenteditable=\"true\"></body></html>"))
 						saveFlow();
 				for(HTMLEditor textArea : conSpeechTextAreas)
-					if(! textArea.getHtmlText().isEmpty())
+					if(! textArea.getHtmlText().equals("<html dir=\"ltr\"><head></head><body contenteditable=\"true\"></body></html>"))
 						saveFlow();
 		currentEvent = event;
 		buildFlowEditor(proFlow, proSpeechNames, proSpeechTextAreas, Side.PRO);

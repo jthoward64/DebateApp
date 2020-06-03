@@ -1,50 +1,22 @@
 package main.java.controls;
 
-import javafx.application.Platform;
-import javafx.scene.Node;
-import javafx.scene.control.ToolBar;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.collections.FXCollections;
 import javafx.scene.web.HTMLEditor;
 
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.List;
 
 public class MinimalHTMLEditor extends HTMLEditor {
+	private final SimpleBooleanProperty toolbarsVisibleProperty = new SimpleBooleanProperty(true);
 	public MinimalHTMLEditor() {
-		super();
-		minimalizeHtmlEditor(this);
+		lookup(".top-toolbar").managedProperty().bind(toolbarsVisibleProperty);
+		lookup(".top-toolbar").visibleProperty().bind(toolbarsVisibleProperty);
+
+		lookup(".bottom-toolbar").managedProperty().bind(toolbarsVisibleProperty);
+		lookup(".bottom-toolbar").visibleProperty().bind(toolbarsVisibleProperty);
 	}
 
-	private void minimalizeHtmlEditor(final HTMLEditor editor) {
-		editor.setVisible(false);
-		Platform.runLater(() -> {
-			ToolBar toolBar1 = (ToolBar) editor.lookup(".top-toolbar");
-			ToolBar toolBar2 = (ToolBar) editor.lookup(".bottom-toolbar");
-
-			HashSet<Node> nodesToKeep = new HashSet<>();
-
-			nodesToKeep.add(editor.lookup(".html-editor-numbers"));
-			nodesToKeep.add(editor.lookup(".html-editor-bullets"));
-
-			nodesToKeep.add(editor.lookup(".html-editor-foreground"));
-			nodesToKeep.add(editor.lookup(".html-editor-background"));
-
-			nodesToKeep.add(editor.lookup(".html-editor-bold"));
-			nodesToKeep.add(editor.lookup(".html-editor-italics"));
-			nodesToKeep.add(editor.lookup(".html-editor-underline"));
-			nodesToKeep.add(editor.lookup(".html-editor-strike"));
-
-			toolBar1.getItems().removeIf(n -> !nodesToKeep.contains(n));
-			toolBar2.getItems().removeIf(n -> !nodesToKeep.contains(n));
-
-			ArrayList<Node> toCopy = new ArrayList<>();
-			toCopy.addAll(toolBar2.getItems());
-			toolBar2.getItems().clear();
-			toolBar1.getItems().addAll(toCopy);
-
-			toolBar2.setVisible(false);
-			toolBar2.setManaged(false);
-
-			editor.setVisible(true);
-		});
+	public SimpleBooleanProperty toolbarsVisiblePropertyProperty() {
+		return toolbarsVisibleProperty;
 	}
 }

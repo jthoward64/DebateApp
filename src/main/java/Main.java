@@ -399,7 +399,6 @@ public class Main extends Application {
 			Label label = new Label(collectedSpeech.getName());
 			namesList.add(collectedSpeech.getName());
 			MinimalHTMLEditor textArea = new MinimalHTMLEditor();
-			textArea.minimalizeHtmlEditor();
 			textAreas.add(textArea);
 			label.prefWidthProperty().bind(textArea.widthProperty());
 			textParent.getChildren().add(new VBox(label, textArea));

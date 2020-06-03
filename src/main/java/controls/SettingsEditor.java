@@ -2,6 +2,9 @@ package main.java.controls;
 
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
@@ -18,6 +21,8 @@ import java.util.Optional;
 public class SettingsEditor extends PropertySheet {
 	private final AppSettings settings;
 
+	private final Dialog<Void> dialog = new Dialog<>();
+
 	public SettingsEditor(AppSettings settings) {
 		this.settings = settings;
 
@@ -26,6 +31,7 @@ public class SettingsEditor extends PropertySheet {
 		setSearchBoxVisible(false);
 
 		getItems().add(buildBooleanItem("Save on Exit", "Automatically save every time the app closes", settings.saveOnExit));
+		getItems().add(buildBooleanItem("Show editor toolbars", "Display the toolbar above the flow editor", settings.toolbarsVisibleProperty));
 
 		getItems().add(buildDoubleItem("Default Height", "Width the app defaults to when it opens", settings.defaultHeight));
 		getItems().add(buildDoubleItem("Default Width", "Height the app defaults to when it opens", settings.defaultWidth));
@@ -60,6 +66,16 @@ public class SettingsEditor extends PropertySheet {
 			}
 		});
 		setPropertyEditorFactory(new CustomPropertyEditorFactory(settings));
+
+		//Set up dialog
+		dialog.getDialogPane().setContent(this);
+		dialog.setContentText(null);
+		dialog.setHeaderText(null);
+		dialog.setTitle("Settings");
+		dialog.getDialogPane().getButtonTypes().setAll(ButtonType.OK);
+		dialog.setResizable(true);
+		dialog.getDialogPane().setMinWidth(350);//350 is the width of a row in the editor, may need to tweak this later
+		dialog.getDialogPane().setMinHeight(42*getItems().size());//Aside from the meaning of life the universe and everything, 42 happens to be the height of a single row
 	}
 
 	private PropertySheet.Item buildIntegerItem(String name, String description, SimpleIntegerProperty property){
@@ -220,6 +236,10 @@ public class SettingsEditor extends PropertySheet {
 				return Optional.of(property);
 			}
 		};
+	}
+
+	public Dialog<Void> getDialog() {
+		return dialog;
 	}
 }
 

@@ -23,6 +23,7 @@ public class AppSettings {
 	public final DebateEvents debateEvents = new DebateEvents();
 
 	public final SimpleBooleanProperty saveOnExit = new SimpleBooleanProperty(false);
+	public final SimpleBooleanProperty toolbarsVisibleProperty = new SimpleBooleanProperty(true);
 
 	public final SimpleDoubleProperty defaultWidth = new SimpleDoubleProperty();
 	public final SimpleDoubleProperty defaultHeight = new SimpleDoubleProperty();

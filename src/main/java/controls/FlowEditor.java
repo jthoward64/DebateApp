@@ -12,6 +12,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.HTMLEditor;
+import main.java.structures.AppSettings;
 import main.java.structures.DebateEvent;
 import main.java.structures.Speech;
 
@@ -76,14 +77,14 @@ public class FlowEditor extends Pane {
 	 * @param event The event associated with this layout
 	 * @throws IllegalFormatException if any part of layoutString is invalid
 	 */
-	public static FlowEditor parseLayoutString(String layoutString, DebateEvent event) throws IllegalFormatException {
+	public static FlowEditor parseLayoutString(String layoutString, DebateEvent event, AppSettings settings) throws IllegalFormatException {
 		FlowEditor editor = new FlowEditor(new HBox[(int) layoutString.chars().filter(value -> value=='[').count()]);
 
 		StringBuilder layoutStringBuilder = new StringBuilder(layoutString);
 		for(int i = 0; i<editor.flowEditorPages.length; i++) {
 			if(layoutString.charAt(0)=='[') {
 				int endIndex = layoutStringBuilder.indexOf("]");
-				editor.flowEditorPages[i] = parseHBoxString(editor, layoutStringBuilder.substring(1, endIndex), event);
+				editor.flowEditorPages[i] = parseHBoxString(editor, layoutStringBuilder.substring(1, endIndex), event, settings);
 				layoutStringBuilder.delete(0, endIndex+1);
 			}
 		}
@@ -96,7 +97,7 @@ public class FlowEditor extends Pane {
 	/**
 	 * Parses the contents of [...] in a layout String for the parseLayoutString method
 	 */
-	private static HBox parseHBoxString(FlowEditor editor, String hBoxString, DebateEvent event) {
+	private static HBox parseHBoxString(FlowEditor editor, String hBoxString, DebateEvent event, AppSettings settings) {
 		HBox box = new HBox();
 		box.prefHeightProperty().bind(editor.heightProperty());
 		box.prefWidthProperty().bind(editor.widthProperty());
@@ -108,7 +109,7 @@ public class FlowEditor extends Pane {
 				if(endIndex==-1) endIndex=hBoxStringBuilder.length();
 				Speech speech = event.getSpeeches().get(Integer.parseInt(hBoxStringBuilder.substring(0, endIndex)));
 				MinimalHTMLEditor htmlEditor = new MinimalHTMLEditor();
-				htmlEditor.minimalizeHtmlEditor();
+				htmlEditor.toolbarsVisiblePropertyProperty().bind(settings.toolbarsVisibleProperty);
 				Label label = new Label(speech.getName());
 				htmlEditor.prefHeightProperty().bind(editor.heightProperty().subtract(label.heightProperty()));
 				htmlEditor.prefWidthProperty().bind(editor.editorWidthExpression);

@@ -18,6 +18,7 @@ import jfxtras.styles.jmetro.JMetro;
 import jfxtras.styles.jmetro.Style;
 import main.java.controls.DebateTimer;
 import main.java.controls.FlowEditor;
+import main.java.controls.SettingsEditor;
 import main.java.structures.AppSettings;
 import main.java.structures.DebateEvent;
 import main.java.structures.DebateEvents;
@@ -40,8 +41,9 @@ import java.nio.file.Files;
  */
 public class DebateAppMain extends Application {
 	final AppSettings settings = new AppSettings(new File(AppUtils.getAppHome()));
+	final SettingsEditor settingsEditor = new SettingsEditor(settings);
 	final DebateEvents events = settings.debateEvents;
-	SimpleObjectProperty<DebateEvent> currentEvent = new SimpleObjectProperty<>(events.pf);
+	final SimpleObjectProperty<DebateEvent> currentEvent = new SimpleObjectProperty<>(events.pf);
 
 	//Bottom
 	final DebateTimer mainTimer = new DebateTimer(Orientation.HORIZONTAL, "Timer", 0);
@@ -49,7 +51,7 @@ public class DebateAppMain extends Application {
 	final HBox bottom = new HBox(mainTimer, mainTimerSpeechSelectorBox);
 
 	//Center
-	final FlowEditor flowEditor = FlowEditor.parseLayoutString("[h:1h:3h:5h:7][h:2h:4h:6h:8]", events.pf);
+	final FlowEditor flowEditor = FlowEditor.parseLayoutString("[h:1h:3h:5h:7][h:2h:4h:6h:8]", events.pf, settings);
 
 	final DebateTimer conPrep = new DebateTimer(Orientation.VERTICAL, "Con", 180);
 	final VBox right = new VBox(conPrep);
@@ -67,12 +69,13 @@ public class DebateAppMain extends Application {
 	final Action openAction = new Action("Open");
 	final Action exportPNG = new Action("PNG");
 	final Menu export = new Menu("Export", null, ActionUtils.createMenuItem(exportPNG));
-	final Menu fileMenu = new Menu("File",null, ActionUtils.createMenuItem(saveAction), ActionUtils.createMenuItem(saveAsAction), ActionUtils.createMenuItem(openAction), export);
+	final Action settingsDialogAction = new Action("Settings", e -> settingsEditor.getDialog().showAndWait());
 
-	final Action alwaysOnTopAction = new Action("Always on top", e -> toggleAlwaysOnTop());
+	final Menu fileMenu = new Menu("File",null, ActionUtils.createMenuItem(saveAction), ActionUtils.createMenuItem(saveAsAction), ActionUtils.createMenuItem(openAction), export, ActionUtils.createMenuItem(settingsDialogAction));
+
 	final Action nextLayoutAction = new Action("Next Layout");
 	final Action nextPage = new Action("Next Page", e -> flowEditor.nextPage());
-	final Menu viewMenu = new Menu("View", null, ActionUtils.createCheckMenuItem(alwaysOnTopAction), ActionUtils.createMenuItem(nextLayoutAction), ActionUtils.createMenuItem(nextPage));
+	final Menu viewMenu = new Menu("View", null, ActionUtils.createMenuItem(nextLayoutAction), ActionUtils.createMenuItem(nextPage));
 
 	final Menu eventMenu = new Menu("Event");//TODO add event switching and times editor
 
@@ -130,13 +133,13 @@ public class DebateAppMain extends Application {
 
 		//Configure center
 		////Configure left slide-out
-		left.setBackground(new Background(new BackgroundFill(Color.DARKGRAY, new CornerRadii(20), Insets.EMPTY)));
+		proPrep.setBackground(new Background(new BackgroundFill(Color.DARKGRAY, new CornerRadii(20), Insets.EMPTY)));
 		proPrep.getButton().setOnMouseClicked(e -> center.show(Side.LEFT));
 		proPrep.getField().setOnMouseClicked(e -> center.show(Side.LEFT));
 		left.setOnMouseClicked(e -> center.setPinnedSide(center.getPinnedSide()==null ? Side.LEFT : null));
 
 		////Configure right slide-out
-		right.setBackground(new Background(new BackgroundFill(Color.DARKGRAY, new CornerRadii(20), Insets.EMPTY)));
+		conPrep.setBackground(new Background(new BackgroundFill(Color.DARKGRAY, new CornerRadii(20), Insets.EMPTY)));
 		conPrep.getButton().setOnMouseClicked(e -> center.show(Side.RIGHT));
 		conPrep.getField().setOnMouseClicked(e -> center.show(Side.RIGHT));
 		right.setOnMouseClicked(e -> center.setPinnedSide(center.getPinnedSide()==null ? Side.RIGHT : null));

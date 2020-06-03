@@ -69,6 +69,12 @@ public class AppSettings {
 		//load default event
 		defaultEvent.setValue(debateEvents.getEvent(properties.getProperty("defEvent", "Public Forum")));
 
+		//load save on exit
+		saveOnExit.setValue(Boolean.parseBoolean(properties.getProperty("saveOnExit", "true")));
+
+		//load toolbar visiblity
+		toolbarsVisibleProperty.setValue(Boolean.parseBoolean(properties.getProperty("toolbarsVisible", "true")));
+
 		saveOnExit.setValue(Boolean.parseBoolean(properties.getProperty("saveOnExit", "false")));
 
 		AppUtils.allowSave = true;
@@ -101,6 +107,9 @@ public class AppSettings {
 
 		//Save saveOnExit
 		properties.setProperty("saveOnExit", String.valueOf(saveOnExit.get()));
+
+		//load toolbar visiblity
+		toolbarsVisibleProperty.setValue(Boolean.parseBoolean(properties.getProperty("toolbarsVisible", "true")));
 
 		properties.store(new FileOutputStream(propertiesFile), "Configuration for tajetaje's DebateApp");
 		AppUtils.allowSave = true;

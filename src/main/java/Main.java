@@ -56,6 +56,7 @@ import java.util.stream.Collectors;
  * @author Tag Howard
  * @deprecated 1.2.0
  */
+@Deprecated
 public class Main extends Application {
 	public static final Version VERSION = new Version(1, 1, 0);
 	public final static File appHome = new File(System.getProperty("user.home") + File.separator + "DebateApp");

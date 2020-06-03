@@ -98,6 +98,7 @@ public class DebateAppMain extends Application {
 	}
 
 	@Override public void init() throws Exception {
+
 		settings.load();
 
 		//OS specific code
@@ -173,9 +174,5 @@ public class DebateAppMain extends Application {
 	@Override public void stop() throws IOException {
 		settings.save();
 		System.out.println(StringEscapeUtils.unescapeHtml4(flowEditor.editorHashMap.get(currentEvent.get().getSpeeches().get(1)).getHtmlText()));
-	}
-
-	private void toggleAlwaysOnTop() {
-		Platform.runLater(() -> mainStage.setAlwaysOnTop(!mainStage.isAlwaysOnTop()));
 	}
 }

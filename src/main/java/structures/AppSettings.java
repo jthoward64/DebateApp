@@ -1,17 +1,16 @@
 package main.java.structures;
 
-import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
 import main.java.AppUtils;
-import main.java.Main;
-import org.controlsfx.control.PropertySheet;
 
-import java.io.*;
-import java.util.HashMap;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 public class AppSettings {
 
@@ -31,16 +30,17 @@ public class AppSettings {
 	public final SimpleObjectProperty<DebateEvent> defaultEvent = new SimpleObjectProperty<>(debateEvents.pf);
 
 	//TODO move some more hardcoded values here
+	//TODO add logging
 
 	public AppSettings(File appHome) {
 		this.appHome = appHome;
 		this.propertiesFile = new File(this.appHome.getPath() + File.separator + "DebateApp.properties");
 
 		try {
-			if (appHome.mkdirs())
-				System.out.println("\"DebateApp\" directory created in user home");
-			if (propertiesFile.createNewFile())
-				System.out.println("Properties file created in \"DebateApp\" directory");
+			if(appHome.mkdirs())
+				Logger.getLogger("DebateApp").info("\"DebateApp\" directory created in user home");
+			if(propertiesFile.createNewFile())
+				Logger.getLogger("DebateApp").info("Properties file created in \"DebateApp\" directory");
 
 			load();
 		} catch (IOException e) {
@@ -72,7 +72,7 @@ public class AppSettings {
 		//load save on exit
 		saveOnExit.setValue(Boolean.parseBoolean(properties.getProperty("saveOnExit", "true")));
 
-		//load toolbar visiblity
+		//load toolbar visiblity TODO fix
 		toolbarsVisibleProperty.setValue(Boolean.parseBoolean(properties.getProperty("toolbarsVisible", "true")));
 
 		saveOnExit.setValue(Boolean.parseBoolean(properties.getProperty("saveOnExit", "false")));
@@ -84,9 +84,9 @@ public class AppSettings {
 		AppUtils.allowSave = false;
 
 		if(appHome.mkdirs())
-			System.out.println("\"DebateApp\" directory created in user home");
+			Logger.getLogger("DebateApp").info("\"DebateApp\" directory created in user home");
 		if(propertiesFile.createNewFile())
-			System.out.println("Properties file created in \"DebateApp\" directory");
+			Logger.getLogger("DebateApp").info("Properties file created in \"DebateApp\" directory");
 
 		//save size
 		properties.setProperty("defaultWidth", String.valueOf(defaultWidth.get()));
@@ -108,7 +108,7 @@ public class AppSettings {
 		//Save saveOnExit
 		properties.setProperty("saveOnExit", String.valueOf(saveOnExit.get()));
 
-		//load toolbar visiblity
+		//load toolbar visiblity TODO fix
 		toolbarsVisibleProperty.setValue(Boolean.parseBoolean(properties.getProperty("toolbarsVisible", "true")));
 
 		properties.store(new FileOutputStream(propertiesFile), "Configuration for tajetaje's DebateApp");

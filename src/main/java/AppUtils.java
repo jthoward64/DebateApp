@@ -1,7 +1,8 @@
 package main.java;
 
 import javafx.application.Platform;
-import javafx.beans.binding.*;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.IntegerBinding;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
@@ -15,12 +16,28 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 public class AppUtils {
 
-	public static boolean allowSave = true;
-	public static Validator<String> timeValidator = Validator.createRegexValidator("Invalid time", "[0-9]{1,2}:[0-9]{1,2}",
-	Severity.ERROR);
+	public static boolean           allowSave     = true;
+	public static Validator<String> timeValidator = Validator
+					.createRegexValidator("Invalid time", "[0-9]{1,2}:[0-9]{1,2}", Severity.ERROR);
+	public static Logger            logger        = Logger.getLogger("DebateApp");
+
+	static {
+		try {
+			logger.addHandler(new FileHandler(getAppHome() + File.separatorChar + "DebateApp-%g.log", 0, 3));
+		} catch(IOException e) {
+			showExceptionDialog(e);
+		}
+		logger.setUseParentHandlers(false);
+		logger.getHandlers()[0].setFormatter(new SimpleFormatter());
+
+		logger.info("Logger initialized");
+	}
 
 	/**
 	 * Opens the given url using the client's default browser <br>
@@ -77,13 +94,15 @@ public class AppUtils {
 		alert.setTitle("Exception Dialog");
 		alert.setHeaderText("DebateApp has experienced an issue");
 		alert.setContentText(allowSave ?
-						"To prevent unstable operation the program will close.\nIf you would like to try to save your work press \"Save\"" :
-						"To prevent unstable operation the program will close.");
+							 "To prevent unstable operation the program will close.\nIf you would like to try to save your work press \"Save\"" :
+							 "To prevent unstable operation the program will close.");
 
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
 		exception.printStackTrace(pw);
 		String exceptionText = sw.toString();
+
+		logger.severe(exceptionText);
 
 		Label label = new Label("The exception stacktrace was:");
 

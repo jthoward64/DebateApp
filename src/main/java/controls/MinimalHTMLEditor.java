@@ -1,7 +1,6 @@
 package main.java.controls;
 
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.scene.SnapshotParameters;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.GridPane;
 import javafx.scene.web.HTMLEditor;
@@ -16,8 +15,6 @@ public class MinimalHTMLEditor extends HTMLEditor {
 
 		lookup(".bottom-toolbar").managedProperty().bind(toolbarsVisibleProperty);
 		lookup(".bottom-toolbar").visibleProperty().bind(toolbarsVisibleProperty);
-
-		System.out.println();
 	}
 
 	public SimpleBooleanProperty toolbarsVisiblePropertyProperty() {
@@ -29,6 +26,9 @@ public class MinimalHTMLEditor extends HTMLEditor {
 	}
 
 	public WritableImage snapshot() {
-		return getWebView().snapshot(null, new WritableImage((int)getWebView().getWidth(), (int)getWebView().getHeight()));
+		WebView view = getWebView();
+		System.out.println(view.getWidth());
+		System.out.println(view.getHeight());
+		return view.snapshot(null, new WritableImage((int)view.getWidth(), (int)view.getHeight()));
 	}
 }

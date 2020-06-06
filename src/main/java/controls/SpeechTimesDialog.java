@@ -7,27 +7,24 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import main.java.AppUtils;
 import main.java.structures.DebateEvent;
-import main.java.structures.Speech;
-import org.controlsfx.validation.Severity;
 import org.controlsfx.validation.ValidationSupport;
-import org.controlsfx.validation.Validator;
 
 import java.util.ArrayList;
 
 public class SpeechTimesDialog extends Dialog<String> {
-	ArrayList<TextField> speechFields = new ArrayList<>();
+	final ArrayList<TextField> speechFields = new ArrayList<>();
 
-	Region topSpacer = new Region();
-	Region bottomSpacer = new Region();
+	final Region topSpacer    = new Region();
+	final Region bottomSpacer = new Region();
 
-	GridPane speechesGrid = new GridPane();
-	VBox mainBox = new VBox(new Label("Fields in red are invalid and will not be saved"), topSpacer,
+	final GridPane speechesGrid = new GridPane();
+	final VBox     mainBox      = new VBox(new Label("Fields in red are invalid and will not be saved"), topSpacer,
 					new Separator(Orientation.HORIZONTAL), bottomSpacer, speechesGrid);
 
-	ButtonType acceptButtonType = new ButtonType("Accept", ButtonBar.ButtonData.OK_DONE);
-	ButtonType revertButtonType = new ButtonType("Revert", ButtonBar.ButtonData.CANCEL_CLOSE);
-	ButtonType defaultButtonType =  new ButtonType("Default", ButtonBar.ButtonData.OTHER);
-	ValidationSupport validationSupport = new ValidationSupport();
+	final ButtonType        acceptButtonType  = new ButtonType("Accept", ButtonBar.ButtonData.OK_DONE);
+	final ButtonType        revertButtonType  = new ButtonType("Revert", ButtonBar.ButtonData.CANCEL_CLOSE);
+	final ButtonType        defaultButtonType =  new ButtonType("Default", ButtonBar.ButtonData.OTHER);
+	final ValidationSupport validationSupport = new ValidationSupport();
 
 	public SpeechTimesDialog(DebateEvent debateEvent) {
 		super();

@@ -1,10 +1,8 @@
 package main.java;
 
-import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.WritableImage;
 import main.java.controls.FlowEditor;
-import main.java.controls.MinimalHTMLEditor;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -14,10 +12,8 @@ import javax.imageio.stream.ImageOutputStream;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 
-//TODO document
 public class ExportHandler {
 	private final FlowEditor                   editor;
 
@@ -49,13 +45,15 @@ public class ExportHandler {
 	 * @param directory parent directory to store images
 	 */
 	public void saveToImages(String type, File directory) throws IOException {
-		BufferedImage[] bufferedImages= getBufferedImages();
+		BufferedImage[] bufferedImages = getBufferedImages();
 
 		for(int i = 0; i<bufferedImages.length; i++) {
 			ImageIO.write(bufferedImages[i], type,
 							new File(directory.getPath() + File.separatorChar + editor.debateEventProperty().getValue()
 											.getName() + "_" + editor.getOrderedSpeeches().get(i) + '.' + type));
 		}
+
+		AppUtils.logger.info("Exported as " + type + " to " + directory.getAbsolutePath());
 	}
 
 	/**
@@ -88,6 +86,8 @@ public class ExportHandler {
 		writer.endWriteSequence();
 
 		writer.dispose();
+
+		AppUtils.logger.info("Exported as TIFF to " + file.getAbsolutePath());
 	}
 
 	/**
@@ -113,6 +113,8 @@ public class ExportHandler {
 		}
 
 		ImageIO.write(result, "png", file);
+
+		AppUtils.logger.info("Exported as big PNG to " + file.getAbsolutePath());
 	}
 
 	public void saveToDOCX(File file) {
@@ -123,5 +125,7 @@ public class ExportHandler {
 			htmlTexts[i] = editors.get(i).getHtmlText();
 		}
 		System.out.println("This is supposed to save " + Arrays.toString(htmlTexts) + " as a docx");//TODO implement
+
+		AppUtils.logger.info("Exported as docx to " + file.getAbsolutePath());
 	}
 }

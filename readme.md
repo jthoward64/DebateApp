@@ -1,4 +1,4 @@
-# DebateApp
+﻿# DebateApp
 
 It's an app ... for debate. OK, more specifically it is a combination digital flow creator and timer for PF, LD, and policy debate
 
@@ -9,15 +9,15 @@ It's an app ... for debate. OK, more specifically it is a combination digital fl
 **These requirements only apply if you want to build from source or use the jar file**
 
 ```
-* JDK 8 (including JavaFX)
-* Some way to fetch the maven libraries (or a local copy)
+* JDK 11 (including JavaFX)
+* Maven
 ```
 
 ### Installing
 Sorry about any security prompts, I don't have hundreds of dollars to blow on code signing certificates
 
 MacOS
-1. Download the [.dmg bundle](https://github.com/tajetaje/DebateApp/releases/latest)
+1. Download the [macOS installer](https://github.com/tajetaje/DebateApp/releases/latest)
 2. Open it
 3. Drag DebateApp into your applications folder
 
@@ -27,9 +27,18 @@ Windows
 1. Download the [Windows installer](https://github.com/tajetaje/DebateApp/releases/latest)
 2. Just run the installer, it will create a Start Menu entry that will run the program
 
-Linux (Sorry, no packages yet)
-1. Download the [.tar.gz](https://github.com/tajetaje/DebateApp/releases/latest) archive
-2. Put it somewhere
+Ubuntu
+1. Download the [.DEB installer](https://github.com/tajetaje/DebateApp/releases/latest)
+2. Run or extract it
+
+Other Linux distros
+1. Download the [.tar.gz archive](https://github.com/tajetaje/DebateApp/releases/latest)
+2. Extract the archive
+3. Move the folder to your preferred install location
+4. (optional) [Create a desktop shortcut](https://www.maketecheasier.com/create-desktop-file-linux/)
+
+
+Extractable archives are also provided for each OS for manual installation
 
 ## Using the app
 #### Choose an event
@@ -41,24 +50,18 @@ Linux (Sorry, no packages yet)
 Ctrl + e will also allow you to cycle between events
 
 ### Save your flow
-1. Either press ctrl+s or click save in the flow menu
-2. Enter the name for you file(s)
-3. Choose a directory to save your flow, defaults to the DebateApp folder in your personal user directory
-4. Select whether to save your flow as a pair of png images, a csv file, or both
+1. Either press ctrl+s or click save in the File menu
+2. Select a file to save and click OK
 
 ### Saving app settings
 Settings save automatically to your user folder when closing the app
 
-### Switching flow between pro and con
-Either
- * Press Ctrl+Space
- 
-or
+### Switching layouts
 
- * CLick pro or con under the "Flow" menu
+Select your preferred layout under View 
 
 ### Make DebateApp always on top
-In the view menu, select always on top
+In the view menu, select "always on top"
 
 ## Known issues
  * In a Windows multi-monitor setup with UI scaling on, menus may open in odd locations
@@ -67,7 +70,13 @@ In the view menu, select always on top
 
 * [InteliJ IDEA](https://www.jetbrains.com/idea/) - The IDE and build tool used
 * [Maven](https://maven.apache.org/) - Dependency Management
-* [packr](https://github.com/libgdx/packr) - Used to generate bundles for macOS and linux
+* [JavaPackager](https://github.com/fvarrui/JavaPackager) - Used to generate native packages
+
+## Building from source
+
+1. Clone the repository
+2. Run `mvn clean compile`
+3. Execute `main.java.DebateAppMain`
 
 ## Versioning
 
@@ -85,6 +94,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Acknowledgments
 
-* [OpenCSV](http://opencsv.sourceforge.net/) was used to save the flow as a csv file
 * [ControlsFX](https://github.com/controlsfx/controlsfx) just has some really useful pre-coded controls that saved a lot of time in this project
 * [JMetro](https://www.pixelduke.com/java-javafx-theme-jmetro/) provides native look and feel to the windows version

@@ -1,13 +1,12 @@
 package main.java.structures;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
-public class DebateEvent { //TODO add and somehow save layout strings to this class (or maybe in settings?)
-	private final String                  name;
-	private final ArrayList<Speech>       speeches    = new ArrayList<>();
-	private final HashMap<String, String> flowLayouts = new HashMap<>();
-	private       int                     prepSeconds;
+public class DebateEvent {
+	private final String            name;
+	private final ArrayList<Speech> speeches    = new ArrayList<>();
+	private final ArrayList<String> flowLayouts = new ArrayList<>();
+	private       int               prepSeconds;
 
 	public DebateEvent(String name, int prepSeconds) {
 		this.name = name;
@@ -18,17 +17,16 @@ public class DebateEvent { //TODO add and somehow save layout strings to this cl
 		speeches.add(new Speech(name, timeSeconds, side, this));
 	}
 
-	public void addLayout(String layoutName, String layout) {
-		//TODO validate
-		flowLayouts.put(layoutName, layout);
-	}
-
-	public String getLayout(String layoutName) {
-		return flowLayouts.get(layoutName);
+	public void addLayout(int index, String layout) {
+		long numElements = layout.chars().filter(num -> (num == 'h')).count();
+		if(speeches.size()-1 >= numElements)
+			flowLayouts.add(index, layout);
+		else
+			throw new IllegalArgumentException("Layout String must have fewer elements than the number of speeches in " + name + " (" + numElements + " > " + (speeches.size()-1) + ")");
 	}
 
 	public String[] getLayouts() {
-		return flowLayouts.values().toArray(new String[0]);
+		return flowLayouts.toArray(new String[0]);
 	}
 
 	public int getPrepSeconds() {

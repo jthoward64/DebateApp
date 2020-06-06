@@ -30,11 +30,15 @@ public class Version {
 	}
 
 	public boolean greaterThan(Version v) {
-		if (main > v.main)
+		if(main>v.main)
 			return true;
-		else if (feature > v.feature)
+		else if(main<v.main)
+			return false;
+		else if(feature>v.feature)
 			return true;
+		else if(feature<v.feature)
+			return false;
 		else
-			return patch > v.patch;
+			return patch>v.patch;
 	}
 }

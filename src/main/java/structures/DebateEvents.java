@@ -26,6 +26,10 @@ public class DebateEvents {
 		pf.addSpeech("Pro Final Focus", 120, Side.PRO);//7
 		pf.addSpeech("Con Final Focus", 120, Side.CON);//8
 		pf.setPrepSeconds(180);
+		pf.addLayout(Layouts.RELATED, "[h:0h:1][h:2h:3][h:5h:6][h:7h:8]");
+		pf.addLayout(Layouts.PRO_CON, "[h:0h:2h:5h:7][h:1h:3h:6h:8]");
+		pf.addLayout(Layouts.SINGLE, "[h:0][h:1][h:2][h:3][h:5][h:6][h:7][h:8]");
+		pf.addLayout(Layouts.ALL, "[h:0h:1h:2h:3h:5h:6h:7h:8]");
 
 		events.add(ld);
 		ld.addSpeech("Aff Constructive", 360, Side.PRO);//0
@@ -35,6 +39,10 @@ public class DebateEvents {
 		ld.addSpeech("Neg Rebuttal", 360, Side.CON);//4
 		ld.addSpeech("2nd Aff Rebuttal", 180, Side.PRO);//5
 		ld.setPrepSeconds(240);
+		ld.addLayout(Layouts.RELATED, "[h:0h:1][h:3h:4h:5]");
+		ld.addLayout(Layouts.PRO_CON, "[h:0h:1h:3][h:4h:5]");
+		ld.addLayout(Layouts.SINGLE, "[h:0][h:1][h:3][h:4][h:5]");
+		ld.addLayout(Layouts.ALL, "[h:0h:1h:3h:4h:5]");
 
 		events.add(policy);
 		policy.addSpeech("1AC", 480, Side.PRO);//0
@@ -47,6 +55,10 @@ public class DebateEvents {
 		policy.addSpeech("2NR", 300, Side.CON);//7
 		policy.addSpeech("2AR", 300, Side.PRO);//8
 		policy.setPrepSeconds(300);
+		policy.addLayout(Layouts.RELATED, "[h:0h:1h:3h:4][h:5h:6h:7h:8]");
+		policy.addLayout(Layouts.PRO_CON, "[h:0h:3h:6h:8][h:1h:4h:5h:7]");
+		policy.addLayout(Layouts.SINGLE, "[h:0][h:1][h:3][h:4][h:5][h:6][h:7][h:8]");
+		policy.addLayout(Layouts.ALL, "[h:0h:1h:3h:4h:5h:6h:7h:8]");
 
 		speeches.addAll(pf.getSpeeches());
 		speeches.addAll(ld.getSpeeches());

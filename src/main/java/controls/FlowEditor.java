@@ -17,18 +17,21 @@ import java.util.HashMap;
 import java.util.IllegalFormatException;
 
 public class FlowEditor extends Pane {
-	private final ArrayList<HBox>                    flowEditorPages = new ArrayList<>();
-	private final IntegerProperty                    currentPage     = new SimpleIntegerProperty(0);
-	private final SimpleStringProperty               layoutStringProperty;//TODO add layout switching
+	private final IntegerProperty currentPage = new SimpleIntegerProperty(0);
+
+	private final SimpleStringProperty              layoutStringProperty = new SimpleStringProperty();
+	private final SimpleObjectProperty<DebateEvent> eventProperty        = new SimpleObjectProperty<>();
+
+	private final ArrayList<Pane> flowEditorPages = new ArrayList<>();
+
 	private final ArrayList<MinimalHTMLEditor>       orderedEditors  = new ArrayList<>();
 	private final ArrayList<Speech>                  orderedSpeeches = new ArrayList<>();
-	private final SimpleObjectProperty<DebateEvent>  eventProperty;
 	private final HashMap<Speech, MinimalHTMLEditor> editorHashMap   = new HashMap<>();
 
 	private final DoubleExpression editorWidthExpression = new DoubleExpression() {
 		@Override public double get() {
-			if(flowEditorPages.size() >= 1)
-				return getWidth() / flowEditorPages.size();
+			if(flowEditorPages.get(currentPage.get()).getChildren().size() >= 1)
+				return getWidth() / flowEditorPages.get(currentPage.get()).getChildren().size();
 			else
 				return 0;
 		}
@@ -46,14 +49,7 @@ public class FlowEditor extends Pane {
 		}
 	};
 
-	public void setFieldText(Speech speech) {
-
-	}
-
 	public FlowEditor(String defaultLayoutString, DebateEvent defaultEvent) {
-		this.layoutStringProperty = new SimpleStringProperty(defaultLayoutString);
-		this.eventProperty = new SimpleObjectProperty<>(defaultEvent);
-
 		parseLayoutString(defaultLayoutString, defaultEvent, new HashMap<>());
 	}
 
@@ -77,7 +73,7 @@ public class FlowEditor extends Pane {
 		return currentPage.get();
 	}
 
-	public ArrayList<HBox> getFlowEditorPages() {
+	public ArrayList<Pane> getFlowEditorPages() {
 		return flowEditorPages;
 	}
 
@@ -98,7 +94,8 @@ public class FlowEditor extends Pane {
 	}
 
 	/**
-	 * TODO update this to match implementation
+	 * TODO add a setting for vertical vs horizontal
+	 *
 	 * <p>
 	 * List of valid schema and their meanings:<br>
 	 * <table style="width:100%">
@@ -134,7 +131,7 @@ public class FlowEditor extends Pane {
 		while(layoutStringBuilder.length()>0) {
 			if(layoutString.charAt(0)=='[') {
 				int endIndex = layoutStringBuilder.indexOf("]");
-				flowEditorPages.add(parseHBoxString(layoutStringBuilder.substring(1, endIndex), event, defaultText));
+				flowEditorPages.add(parseBoxString(layoutStringBuilder.substring(1, endIndex), event, defaultText));
 				layoutStringBuilder.delete(0, endIndex + 1);
 			}
 		}
@@ -145,7 +142,7 @@ public class FlowEditor extends Pane {
 	/**
 	 * Parses the contents of [...] in a layout String for the parseLayoutString method
 	 */
-	private HBox parseHBoxString(String hBoxString, DebateEvent event, HashMap<String, String> defaultText) {
+	private HBox parseBoxString(String hBoxString, DebateEvent event, HashMap<String, String> defaultText) {
 		HBox box = new HBox();
 		box.prefHeightProperty().bind(heightProperty());
 		box.prefWidthProperty().bind(widthProperty());

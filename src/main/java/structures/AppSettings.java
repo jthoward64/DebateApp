@@ -14,8 +14,8 @@ import java.util.logging.Logger;
 
 public class AppSettings {
 
-	public File appHome;//These should probably be made user definable eventually
-	public File propertiesFile;
+	public final File appHome;//These should probably be made user definable eventually
+	public final File propertiesFile;
 
 	public final Properties properties = new Properties();
 
@@ -29,9 +29,6 @@ public class AppSettings {
 
 	public final SimpleObjectProperty<DebateEvent> defaultEvent = new SimpleObjectProperty<>(debateEvents.pf);
 
-	//TODO move some more hardcoded values here
-	//TODO add logging
-
 	public AppSettings(File appHome) {
 		this.appHome = appHome;
 		this.propertiesFile = new File(this.appHome.getPath() + File.separator + "DebateApp.properties");
@@ -39,8 +36,10 @@ public class AppSettings {
 		try {
 			if(appHome.mkdirs())
 				Logger.getLogger("DebateApp").info("\"DebateApp\" directory created in user home");
-			if(propertiesFile.createNewFile())
+			if(propertiesFile.createNewFile()) {
 				Logger.getLogger("DebateApp").info("Properties file created in \"DebateApp\" directory");
+				AppUtils.firstRun = true;
+			}
 
 			load();
 		} catch (IOException e) {
@@ -72,12 +71,14 @@ public class AppSettings {
 		//load save on exit
 		saveOnExit.setValue(Boolean.parseBoolean(properties.getProperty("saveOnExit", "true")));
 
-		//load toolbar visiblity TODO fix
+		//load toolbar visibility
 		toolbarsVisibleProperty.setValue(Boolean.parseBoolean(properties.getProperty("toolbarsVisible", "true")));
 
 		saveOnExit.setValue(Boolean.parseBoolean(properties.getProperty("saveOnExit", "false")));
 
 		AppUtils.allowSave = true;
+
+		AppUtils.logger.info("Settings loaded from " + propertiesFile.getAbsolutePath());
 	}
 
 	public void save() throws IOException {
@@ -108,10 +109,12 @@ public class AppSettings {
 		//Save saveOnExit
 		properties.setProperty("saveOnExit", String.valueOf(saveOnExit.get()));
 
-		//load toolbar visiblity TODO fix
-		toolbarsVisibleProperty.setValue(Boolean.parseBoolean(properties.getProperty("toolbarsVisible", "true")));
+		//save toolbar visibility
+		properties.setProperty("toolbarsVisible", String.valueOf(toolbarsVisibleProperty.get()));
 
 		properties.store(new FileOutputStream(propertiesFile), "Configuration for tajetaje's DebateApp");
 		AppUtils.allowSave = true;
+
+		AppUtils.logger.info("Settings saved to " + propertiesFile.getAbsolutePath());
 	}
 }

@@ -7,7 +7,6 @@ import main.java.structures.Version;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -31,13 +30,13 @@ public class UpdateChecker {
 		return latestVersion.greaterThan(current);
 	}
 
-	public void showUpdateAlert() throws IOException, URISyntaxException {
+	public void showUpdateAlert() {
 		Alert newVersionAlert = new Alert(Alert.AlertType.INFORMATION);
 		newVersionAlert.setHeaderText("A new version is available");
 		newVersionAlert.setTitle("Update message");
-		newVersionAlert.setContentText("Would you like to go to the download for version " + latestVersion + " now?");
+		newVersionAlert.setContentText("Would you like to go to the download page for version " + latestVersion + " now?");
 		newVersionAlert.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
-		if (newVersionAlert.showAndWait().orElse(ButtonType.NO).getButtonData().equals(ButtonBar.ButtonData.YES)) {
+		if(newVersionAlert.showAndWait().orElse(ButtonType.NO).getButtonData().equals(ButtonBar.ButtonData.YES)) {
 			AppUtils.openURL("https://github.com/tajetaje/DebateApp/releases/latest");
 		}
 	}

@@ -9,6 +9,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import javafx.stage.Window;
 import org.controlsfx.validation.Severity;
 import org.controlsfx.validation.Validator;
 
@@ -20,23 +23,26 @@ import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
+import static main.java.DebateAppMain.saveFileFilter;
+
 public class AppUtils {
 
-	public static boolean           allowSave     = true;
-	public static Validator<String> timeValidator = Validator
+	public static       boolean           allowSave     = true;
+	public static       boolean           firstRun      = false;
+	public static final Validator<String> timeValidator = Validator
 					.createRegexValidator("Invalid time", "[0-9]{1,2}:[0-9]{1,2}", Severity.ERROR);
-	public static Logger            logger        = Logger.getLogger("DebateApp");
+	public static final Logger            logger        = Logger.getLogger("DebateApp");
 
 	static {
 		try {
-			logger.addHandler(new FileHandler(getAppHome() + File.separatorChar + "DebateApp-%g.log", 0, 3));
+			File appHomeDirectory = new File(getAppHome() + File.separatorChar + "DebateApp-%g.log");
+			appHomeDirectory.mkdirs();
+			logger.addHandler(new FileHandler(appHomeDirectory.getAbsolutePath().toString(), 0, 3));
 		} catch(IOException e) {
 			showExceptionDialog(e);
 		}
 		logger.setUseParentHandlers(false);
 		logger.getHandlers()[0].setFormatter(new SimpleFormatter());
-
-		logger.info("Logger initialized");
 	}
 
 	/**
@@ -61,6 +67,8 @@ public class AppUtils {
 		} catch(IOException e) {
 			showExceptionDialog(e);
 		}
+
+		logger.info("Opened " + url);
 	}
 
 	public static IntegerBinding remainderProperty(IntegerBinding value, int divisor) {
@@ -130,7 +138,23 @@ public class AppUtils {
 			alert.getButtonTypes().setAll(ButtonType.CLOSE);
 
 		if (alert.showAndWait().orElse(ButtonType.CLOSE).equals(saveButtonType)) {
-			System.out.println("Placeholder"); //TODO implement
+			Window owner = Stage.getWindows().stream().filter(Window::isShowing).findFirst().orElse(null);
+			FileChooser chooser = new FileChooser();
+			chooser.setTitle("Save");
+			chooser.getExtensionFilters().add(saveFileFilter);
+			chooser.setSelectedExtensionFilter(saveFileFilter);
+			SaveHandler editorSaveHandler = new SaveHandler(DebateAppMain.instance.flowEditor,
+							chooser.showSaveDialog(owner));
+			try {
+				editorSaveHandler.save();
+			} catch(IOException ioException) {
+				StringWriter sw1 = new StringWriter();
+				PrintWriter pw1 = new PrintWriter(sw1);
+				exception.printStackTrace(pw1);
+				String exceptionText1 = sw1.toString();
+
+				logger.severe(exceptionText1);
+			}
 		}
 
 		Platform.exit();

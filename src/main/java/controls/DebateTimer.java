@@ -3,15 +3,11 @@ package main.java.controls;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.application.Platform;
-import javafx.beans.InvalidationListener;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.binding.BooleanExpression;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.value.ChangeListener;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -19,33 +15,26 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import main.java.AppUtils;
-import org.controlsfx.validation.Severity;
 import org.controlsfx.validation.ValidationSupport;
-import org.controlsfx.validation.Validator;
 
 public class DebateTimer extends Region {
 
 	private final Timeline  timerTimeline = new Timeline();
 	private final TextField timerField    = new TextField();
 	private final Button button = new Button();
+	private final Label label = new Label();
+	private final Node graphic;
 
-	private boolean timerRunning = false;
-	public final BooleanExpression timerRunningProperty = new BooleanExpression() {
-		@Override public void addListener(InvalidationListener invalidationListener) {}
-		@Override public void removeListener(InvalidationListener invalidationListener) {}
-		@Override public void addListener(ChangeListener<? super Boolean> changeListener) {}
-		@Override public void removeListener(ChangeListener<? super Boolean> changeListener) {}
-		@Override public boolean get() {
-			return timerRunning;
-		}
-	};
+	public final SimpleBooleanProperty timerRunningProperty = new SimpleBooleanProperty(false);
 
 	public final int defaultTime;
 
-	ValidationSupport validationSupport = new ValidationSupport();
+	final ValidationSupport validationSupport = new ValidationSupport();
 
-	public DebateTimer(Orientation orientation, String labelText, int defaultTime) {
+	public DebateTimer(Orientation orientation, String labelText, int defaultTime, Node graphic) {
 		Pane box;
+
+		this.graphic = graphic;
 		if (orientation.equals(Orientation.VERTICAL)) {
 			box = new VBox();
 			((VBox) box).setAlignment(Pos.CENTER);
@@ -55,7 +44,8 @@ public class DebateTimer extends Region {
 		} else
 			throw new IllegalArgumentException("Parameter orientation must be either VERTICAL or HORIZONTAL");
 
-		Label label = new Label(labelText);
+		label.setText(labelText);
+		label.setGraphic(graphic);
 
 		this.defaultTime=defaultTime;
 
@@ -65,6 +55,7 @@ public class DebateTimer extends Region {
 		resetTimer(defaultTime);
 
 		box.getChildren().addAll(label, timerField, button);
+
 		getChildren().setAll(box);
 	}
 
@@ -107,7 +98,7 @@ public class DebateTimer extends Region {
 	}
 
 	public void startTimer() {
-		timerRunning = true;
+		timerRunningProperty.set(true);
 		timerField.setEditable(false);
 		button.setStyle("-fx-background-color: ff5555;");
 		timerTimeline.play();
@@ -116,7 +107,7 @@ public class DebateTimer extends Region {
 	}
 
 	public void resumeTimer() {
-		timerRunning = true;
+		timerRunningProperty.set(true);
 		timerField.setEditable(false);
 		button.setStyle("-fx-background-color: ff5555;");
 		timerTimeline.play();
@@ -124,7 +115,7 @@ public class DebateTimer extends Region {
 	}
 
 	public void pauseTimer() {
-		timerRunning = false;
+		timerRunningProperty.set(false);
 		timerTimeline.pause();
 		button.setStyle("-fx-background-color: lightgreen;");
 		button.setText("Resume");
@@ -132,7 +123,7 @@ public class DebateTimer extends Region {
 	}
 
 	public void endTimer() {
-		timerRunning = false;
+		timerRunningProperty.set(false);
 		timerTimeline.stop();
 		button.setText("Start");
 		timerField.setEditable(true);
@@ -150,7 +141,15 @@ public class DebateTimer extends Region {
 		return button;
 	}
 
+	public Label getLabel() {
+		return label;
+	}
+
 	public TextField getField() {
 		return timerField;
+	}
+
+	public Node getGraphic() {
+		return graphic;
 	}
 }

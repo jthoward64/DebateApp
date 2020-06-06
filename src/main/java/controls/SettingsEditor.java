@@ -2,7 +2,6 @@ package main.java.controls;
 
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
-import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.paint.Color;
@@ -19,12 +18,10 @@ import java.util.Arrays;
 import java.util.Optional;
 
 public class SettingsEditor extends PropertySheet {
-	private final AppSettings settings;
 
 	private final Dialog<Void> dialog = new Dialog<>();
 
 	public SettingsEditor(AppSettings settings) {
-		this.settings = settings;
 
 		setMode(Mode.NAME);
 		setModeSwitcherVisible(false);

@@ -7,3 +7,4 @@ update steps.txt
 src/main/resources/META-INF/MANIFEST.MF
 macJRECache/
 linuxJRECache/
+/assets/

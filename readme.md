@@ -1,4 +1,4 @@
-﻿# DebateApp
+# DebateApp
 
 It's an app ... for debate. OK, more specifically it is a combination digital flow creator and timer for PF, LD, and policy debate
 
@@ -39,6 +39,19 @@ Other Linux distros
 
 
 Extractable archives are also provided for each OS for manual installation
+
+## Features
+* Support for PF, LD, and Policy
+* Flow editors for every speech
+* Rich text editing
+* Customizable timers for every speech and for prep (Defaults to NSDA standards)
+* Quick swapping with a keybind between "pages"
+* Multiple layouts for your flows
+* Save your flow as a custom .db8 file so you can come back to it later
+* Export your flow to one large PNG, a PNG for every speech, or a multi-page TIFF
+* Set as always on top if you have multiple windows open
+* Links to a number of helpful debate-related sites (including r/Debate)
+* Easy installer for Windows, macOS, and now for Linux
 
 ## Using the app
 #### Choose an event

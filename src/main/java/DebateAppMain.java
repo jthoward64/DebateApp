@@ -4,14 +4,11 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
-import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
-import javafx.geometry.Side;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -28,7 +25,6 @@ import main.java.controls.FlowEditor;
 import main.java.controls.SettingsEditor;
 import main.java.controls.SpeechTimesDialog;
 import main.java.structures.*;
-import org.controlsfx.control.HiddenSidesPane;
 import org.controlsfx.control.action.Action;
 import org.controlsfx.control.action.ActionUtils;
 
@@ -68,21 +64,19 @@ public class DebateAppMain extends Application {
 	final               SimpleObjectProperty<DebateEvent> currentEvent   = new SimpleObjectProperty<>(settings.defaultEvent.getValue());
 
 	//Bottom
-	final DebateTimer      mainTimer                  = new DebateTimer(Orientation.HORIZONTAL, "Timer", 0, null);
+	final DebateTimer      mainTimer                  = new DebateTimer(Orientation.HORIZONTAL, "Speech Timer", 0, null);
 	final ComboBox<Speech> mainTimerSpeechSelectorBox = new ComboBox<>();
-	final HBox             bottom                     = new HBox(mainTimer, mainTimerSpeechSelectorBox);
+	final HBox mainTimerBox = new HBox(mainTimer, mainTimerSpeechSelectorBox);
+
+	final DebateTimer conPrep = new DebateTimer(Orientation.HORIZONTAL, "Con", 180, null);
+
+	final DebateTimer proPrep = new DebateTimer(Orientation.HORIZONTAL, "Pro", 180, null);
+
+	final BorderPane             bottom                     = new BorderPane(mainTimerBox, null, conPrep, null, proPrep);
 
 	//Center
 	final FlowEditor flowEditor = new FlowEditor(currentEvent.getValue().getLayouts()[Layouts.RELATED],
 					currentEvent.getValue());
-
-	final DebateTimer conPrep = new DebateTimer(Orientation.VERTICAL, "Con", 180, new Button(null,new ImageView(new Image(getClass().getResourceAsStream("/pin16.png")))));
-	final VBox        right   = new VBox(conPrep);
-
-	final DebateTimer proPrep = new DebateTimer(Orientation.VERTICAL, "Pro", 180, new Button(null,new ImageView(new Image(getClass().getResourceAsStream("/pin16.png")))));
-	final VBox        left    = new VBox(proPrep);
-
-	final HiddenSidesPane center = new HiddenSidesPane(flowEditor, null, right, null, left);
 
 	//Menu
 	////File
@@ -218,12 +212,14 @@ public class DebateAppMain extends Application {
 					ActionUtils.createMenuItem(editTimesAction));
 
 	////Links
-	final Action openNsdaAction    = new Action("NSDA", e -> AppUtils.openURL("https://www.speechanddebate.org"));
-	final Action openTabroomAction = new Action("Tabroom", e -> AppUtils.openURL("https://www.tabroom.com"));
+	final Action openNsdaAction    = new Action("NSDA", e -> AppUtils.openURL("https://www.speechanddebate.org/"));
+	final Action openTabroomAction = new Action("Tabroom", e -> AppUtils.openURL("https://www.tabroom.com/"));
 	final Action openDriveAction   = new Action("Google Drive",
-					e -> AppUtils.openURL("https://drive.google.com/drive"));
+					e -> AppUtils.openURL("https://drive.google.com/drive/"));
+	final Action openDebateRedditAction   = new Action("r/Debate",
+					e -> AppUtils.openURL("https://www.reddit.com/r/Debate/"));
 	final Menu   linksMenu         = new Menu("Links", null, ActionUtils.createMenuItem(openNsdaAction),
-					ActionUtils.createMenuItem(openTabroomAction), ActionUtils.createMenuItem(openDriveAction));
+					ActionUtils.createMenuItem(openTabroomAction), ActionUtils.createMenuItem(openDriveAction), ActionUtils.createMenuItem(openDebateRedditAction));
 
 	////Help
 	final Action aboutAction          = new Action("About", e -> {
@@ -245,7 +241,7 @@ public class DebateAppMain extends Application {
 	final MenuBar top = new MenuBar(fileMenu, linksMenu, viewMenu, eventMenu, helpMenu);
 
 	//root layout
-	final BorderPane root      = new BorderPane(center, top, null, bottom, null);
+	final BorderPane root      = new BorderPane(flowEditor, top, null, bottom, null);
 	final Scene      mainScene = new Scene(root);
 
 	public DebateAppMain() {
@@ -281,34 +277,11 @@ public class DebateAppMain extends Application {
 				AppUtils.logger.info("Unknown OS!");
 		}
 
-		//Backend configuration
-		//--------------------
-
-		//Frontend configuration
-		//----------------------
-
 		//Configure menu
 		saveAsAction.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCodeCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN));
 		saveAction.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCodeCombination.SHORTCUT_DOWN));
 		openAction.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCodeCombination.SHORTCUT_DOWN));
 		nextPage.setAccelerator(new KeyCodeCombination(KeyCode.SPACE, KeyCodeCombination.SHORTCUT_DOWN));
-
-		//Configure center
-		center.setTriggerDistance(24);
-
-		////Configure left slide-out
-		proPrep.setBackground(new Background(new BackgroundFill(Color.DARKGRAY, new CornerRadii(20), Insets.EMPTY)));
-		proPrep.getButton().setOnMouseClicked(e -> center.show(Side.LEFT));
-		proPrep.getField().setOnMouseClicked(e -> center.show(Side.LEFT));
-		proPrep.getLabel().setOnMouseClicked(e -> center.show(Side.LEFT));
-
-		////Configure right slide-out
-		conPrep.setBackground(new Background(new BackgroundFill(Color.DARKGRAY, new CornerRadii(20), Insets.EMPTY)));
-		conPrep.getButton().setOnMouseClicked(e -> center.show(Side.RIGHT));
-		conPrep.getField().setOnMouseClicked(e -> center.show(Side.RIGHT));
-		conPrep.getLabel().setOnMouseClicked(e -> center.show(Side.RIGHT));
-
-		////Configure flow editor
 
 		//Configure bottom
 		mainTimerSpeechSelectorBox.setItems(FXCollections.observableArrayList(currentEvent.getValue().getSpeeches()));
@@ -317,6 +290,11 @@ public class DebateAppMain extends Application {
 				mainTimer.resetTimer(mainTimerSpeechSelectorBox.getValue().getTimeSeconds());
 		});
 		mainTimerSpeechSelectorBox.disableProperty().bind(mainTimer.timerRunningProperty);
+
+		mainTimerBox.setAlignment(Pos.CENTER);
+		mainTimerBox.setSpacing(5);
+
+		bottom.setBorder(new Border(new BorderStroke(Color.web("748A86"), BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
 	}
 
 	@Override public void start(Stage mainStage) {
@@ -347,18 +325,18 @@ public class DebateAppMain extends Application {
 							"\tTo see the readme and other helpful information, use the\n" +
 							"\thelp menu and click \"About\"\n" +
 							"Plus, here are a couple of useful tips:\n" +
-							"1. Move your mouse to a side of the window to see prep timers\n" +
+							"1. Timers for pro/con prep and a main timer for speeches are at the bottom of the window\n" +
 							"2. There are lots of ways to save your flows, use the File\n" +
 							"\tmenu to see them all\n" +
 							"3. DebateApp has multiple layouts and supported events, you\n" +
 							"\tcan use the view menu to set your layout and the\n" +
-							"event menu to cycle through events\n" +
+							"\tevent menu to cycle through events\n" +
 							"4. If you have an issue or an idea please report it under\n" +
 							"\tthe help menu so I can take a look\n" +
 							"5. Take a look at the settings menu to customize the app\n\n" +
 							"Lastly you should remember the following key bind:\n" +
 							"\t\t\tControl (Command) + Space\n" +
-							"It will go to the next page of speeches" +
+							"It will go to the next page of speeches\n" +
 							"Enjoy!");
 			infoAlert.showAndWait();
 		}
@@ -380,7 +358,7 @@ public class DebateAppMain extends Application {
 				AppUtils.logger.info("Didn't find new version");
 				Popup noUpdatePopup = new Popup();
 				Label topLabel = new Label("No updates found");
-				topLabel.setStyle("-fx-background-color: #008000; -fx-font-size: 24;");
+				topLabel.setStyle("-fx-background-color: #BAD77A; -fx-font-size: 24;");
 				Label bottomLabel = new Label("Click anywhere to continue");
 				bottomLabel.setStyle("-fx-font-size: 10;");
 				VBox vbox = new VBox(topLabel, bottomLabel);

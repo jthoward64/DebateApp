@@ -62,7 +62,7 @@ public class DebateTimer extends Region {
 	public void resetTimer(int seconds) {
 		button.setText("Start");
 		timerField.setEditable(true);
-		button.setStyle("-fx-background-color: lightgreen;");
+		button.setStyle("-fx-background-color: BAD77A;");
 
 		timerField.setText(AppUtils.formatTime(seconds));
 		timerTimeline.setCycleCount(Animation.INDEFINITE);
@@ -100,7 +100,7 @@ public class DebateTimer extends Region {
 	public void startTimer() {
 		timerRunningProperty.set(true);
 		timerField.setEditable(false);
-		button.setStyle("-fx-background-color: ff5555;");
+		button.setStyle("-fx-background-color: B1382A;");
 		timerTimeline.play();
 		button.setText("Pause");
 		resumeTimer();
@@ -109,7 +109,7 @@ public class DebateTimer extends Region {
 	public void resumeTimer() {
 		timerRunningProperty.set(true);
 		timerField.setEditable(false);
-		button.setStyle("-fx-background-color: ff5555;");
+		button.setStyle("-fx-background-color: B1382A;");
 		timerTimeline.play();
 		button.setText("Pause");
 	}
@@ -117,7 +117,7 @@ public class DebateTimer extends Region {
 	public void pauseTimer() {
 		timerRunningProperty.set(false);
 		timerTimeline.pause();
-		button.setStyle("-fx-background-color: lightgreen;");
+		button.setStyle("-fx-background-color: BAD77A;");
 		button.setText("Resume");
 		timerField.setEditable(true);
 	}
@@ -128,12 +128,12 @@ public class DebateTimer extends Region {
 		button.setText("Start");
 		timerField.setEditable(true);
 		((Pane) button.getParent()).setBackground(new Background(
-						new BackgroundFill(Color.RED, CornerRadii.EMPTY, Insets.EMPTY)));
+						new BackgroundFill(Color.web("B1382A"), CornerRadii.EMPTY, Insets.EMPTY)));
 		button.getParent().setOnMouseClicked(e -> {
 			timerField.setText(AppUtils.formatTime(defaultTime));
 			((Pane) button.getParent()).setBackground(Background.EMPTY);
 			button.getParent().setOnMouseClicked(null);
-			button.setStyle("-fx-background-color: lightgreen;");
+			button.setStyle("-fx-background-color: BAD77A;");
 		});
 	}
 

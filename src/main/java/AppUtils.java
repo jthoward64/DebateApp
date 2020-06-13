@@ -36,8 +36,9 @@ public class AppUtils {
 	static {
 		try {
 			File appHomeDirectory = new File(getAppHome() + File.separatorChar + "DebateApp-%g.log");
-			appHomeDirectory.mkdirs();
-			logger.addHandler(new FileHandler(appHomeDirectory.getAbsolutePath().toString(), 0, 3));
+			if(appHomeDirectory.mkdirs())
+				Platform.runLater(() -> logger.info("DebateApp directory created by logger initializer"));
+			logger.addHandler(new FileHandler(appHomeDirectory.getAbsolutePath(), 0, 3));
 		} catch(IOException e) {
 			showExceptionDialog(e);
 		}

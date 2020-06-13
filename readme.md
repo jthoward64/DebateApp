@@ -14,7 +14,7 @@ It's an app ... for debate. OK, more specifically it is a combination digital fl
 ```
 
 ### Installing
-Sorry about any security prompts, I don't have hundreds of dollars to blow on code signing certificates
+Sorry about any security prompts, code signing certificates are expensive
 
 MacOS
 1. Download the [macOS installer](https://github.com/tajetaje/DebateApp/releases/latest)
@@ -32,7 +32,7 @@ Ubuntu
 2. Run or extract it
 
 Other Linux distros
-1. Download the [.tar.gz archive](https://github.com/tajetaje/DebateApp/releases/latest)
+1. Download the [.tar.gz archive](https://github.com/tajetaje/DebateApp/releases/latest) marked for linux
 2. Extract the archive
 3. Move the folder to your preferred install location
 4. (optional) [Create a desktop shortcut](https://www.maketecheasier.com/create-desktop-file-linux/)
@@ -42,33 +42,32 @@ Extractable archives are also provided for each OS for manual installation
 
 ## Using the app
 #### Choose an event
-1. Click "Settings" in the menu
-2. Hover over "Event"
-3. Select your event
-4. (Optional) Reopen the menu and select set as default to automatically use this event on startup
+1. Click "Event" in the menu
+2. Click next event until you have reached your preferred event
 
-Ctrl + e will also allow you to cycle between events
+To always open the app to a certain event, change "Default Event" in settings
 
 ### Save your flow
 1. Either press ctrl+s or click save in the File menu
 2. Select a file to save and click OK
 
-### Saving app settings
-Settings save automatically to your user folder when closing the app
-
 ### Switching layouts
-
 Select your preferred layout under View 
+
+### Disabling the toolbars on the editors
+If you find the editor toolbars distracting, or unnecessary, they can be disabled in settings
 
 ### Make DebateApp always on top
 In the view menu, select "always on top"
 
 ## Known issues
  * In a Windows multi-monitor setup with UI scaling on, menus may open in odd locations
+ * Aggressive anti-viruses (e.g. Avast, or macOS Gatekeeper) usually throw a warning about unsigned code
+    * Solution: after the first scan most AVs will ignore DebateApp, if they don't simply mark the DebateApp exe as excluded
 
 ## Built With
 
-* [InteliJ IDEA](https://www.jetbrains.com/idea/) - The IDE and build tool used
+* [IntelliJ IDEA](https://www.jetbrains.com/idea/) - The IDE and build tool used
 * [Maven](https://maven.apache.org/) - Dependency Management
 * [JavaPackager](https://github.com/fvarrui/JavaPackager) - Used to generate native packages
 
@@ -96,3 +95,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 * [ControlsFX](https://github.com/controlsfx/controlsfx) just has some really useful pre-coded controls that saved a lot of time in this project
 * [JMetro](https://www.pixelduke.com/java-javafx-theme-jmetro/) provides native look and feel to the windows version
+* [Freepik](https://www.flaticon.com/authors/freepik) created some icons that were used in the app

@@ -59,16 +59,25 @@
             <artifactId>controlsfx</artifactId>
             <version>11.0.1</version>
         </dependency>
-        <!--        Will put these back in when I implement DOCX support-->
-        <!--        <dependency>-->
-        <!--            <groupId>org.docx4j</groupId>-->
-        <!--            <artifactId>docx4j-core</artifactId>-->
-        <!--            <version>11.1.7</version>-->
-        <!--        </dependency>-->
-        <!--        <dependency>-->
-        <!--            <groupId>net.sf.jtidy</groupId>-->
-        <!--            <artifactId>jtidy</artifactId>-->
-        <!--            <version>r938</version>-->
-        <!--        </dependency>-->
+        <dependency>
+            <groupId>org.docx4j</groupId>
+            <artifactId>docx4j-core</artifactId>
+            <version>11.1.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.docx4j</groupId>
+            <artifactId>docx4j-ImportXHTML</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.jtidy</groupId>
+            <artifactId>jtidy</artifactId>
+            <version>r938</version>
+        </dependency>
+        <dependency>
+            <groupId>org.docx4j</groupId>
+            <artifactId>docx4j-JAXB-ReferenceImpl</artifactId>
+            <version>8.1.0</version>
+        </dependency>
     </dependencies>
 </project>

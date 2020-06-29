@@ -27,6 +27,7 @@ import main.java.controls.SpeechTimesDialog;
 import main.java.structures.*;
 import org.controlsfx.control.action.Action;
 import org.controlsfx.control.action.ActionUtils;
+import org.docx4j.openpackaging.exceptions.Docx4JException;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,16 +41,15 @@ import java.util.HashMap;
  * "Flaticon">www.flaticon.com</a></div>
  *
  * @author Tag Howard
- *
  */
 public class DebateAppMain extends Application {
-	public static       DebateAppMain instance;
-	public static final Version       VERSION = new Version(2, 0, 0);
+	public static final Version VERSION = new Version("2.0.0");
+	public static final FileChooser.ExtensionFilter pngFileFilter = new FileChooser.ExtensionFilter("PNG image",
+					"*.png");
 
 	public static final FileChooser.ExtensionFilter saveFileFilter = new FileChooser.ExtensionFilter(
 					"DebateApp save file", "*.db8");
-	public static final FileChooser.ExtensionFilter pngFileFilter  = new FileChooser.ExtensionFilter("PNG image",
-					"*.png");
+	public static DebateAppMain instance;
 	public static final FileChooser.ExtensionFilter tiffFileFilter = new FileChooser.ExtensionFilter("TIFF image",
 					"*.tiff", "*.tif");
 	public static final FileChooser.ExtensionFilter docxFileFilter = new FileChooser.ExtensionFilter("Word document",
@@ -83,40 +83,53 @@ public class DebateAppMain extends Application {
 	//////Save As
 	SaveHandler editorSaveHandler = new SaveHandler(flowEditor, null);
 	final Action        saveAsAction         = new Action("Save As", e -> {
+		AppUtils.logger.info("Started Save As action");
 		FileChooser chooser = new FileChooser();
 		chooser.setTitle("Save");
 		chooser.getExtensionFilters().add(saveFileFilter);
 		chooser.setSelectedExtensionFilter(saveFileFilter);
 		Platform.runLater(() -> {
-			editorSaveHandler = new SaveHandler(flowEditor, chooser.showSaveDialog(mainStage));
+			File file = chooser.showSaveDialog(mainStage);
+			if (file == null) {
+				AppUtils.logger.info("Selected file was null, Save As action aborted");
+				return;
+			}
+			editorSaveHandler = new SaveHandler(flowEditor, file);
 			try {
 				editorSaveHandler.save();
-			} catch(IOException ioException) {
+			} catch (IOException ioException) {
 				AppUtils.showExceptionDialog(ioException);
 			}
 		});
 	});
 	//////Save
 	final Action        saveAction           = new Action("Save", e -> {
-		if(editorSaveHandler.getWorkingFile()==null)
+		AppUtils.logger.info("Started Save action");
+		if (editorSaveHandler.getWorkingFile() == null || !editorSaveHandler.getWorkingFile().exists()) {
+			AppUtils.logger.info("Save file was null or did not exist, running Save As action instead");
 			saveAsAction.handle(e);
-		else {
+		} else {
 			try {
 				editorSaveHandler.save();
-			} catch(IOException ioException) {
+			} catch (IOException ioException) {
 				AppUtils.showExceptionDialog(ioException);
 			}
 		}
 	});
 	//////Open
 	final Action        openAction           = new Action("Open", e -> Platform.runLater(() -> {
+		AppUtils.logger.info("Started Open action");
 		FileChooser chooser = new FileChooser();
 		chooser.setTitle("Open");
 		chooser.getExtensionFilters().add(saveFileFilter);
 		chooser.setSelectedExtensionFilter(saveFileFilter);
 		try {
 			File file = chooser.showOpenDialog(mainStage);
-			if(editorSaveHandler==null)
+			if (file == null) {
+				AppUtils.logger.info("Selected file was null, Open action aborted");
+				return;
+			}
+			if (editorSaveHandler == null)
 				editorSaveHandler = new SaveHandler(flowEditor, file);
 			editorSaveHandler.open(file, events);
 		} catch(IOException ioException) {
@@ -126,7 +139,9 @@ public class DebateAppMain extends Application {
 	//////Export to PNGs
 	final ExportHandler editorExportHandler  = new ExportHandler(flowEditor);
 	final Action        exportPNGsAction     = new Action("Export to\nmultiple PNGs", e -> Platform.runLater(() -> {
-		Alert alert = new Alert(Alert.AlertType.INFORMATION, "This will save a PNG file for every text box in the current event", ButtonType.OK);
+		AppUtils.logger.info("Started multiple PNG export");
+		Alert alert = new Alert(Alert.AlertType.INFORMATION,
+						"This will save a PNG file for every text box in the current event", ButtonType.OK);
 		alert.setTitle("Export to multiple PNGs");
 		alert.setHeaderText(null);
 		alert.showAndWait();
@@ -134,34 +149,48 @@ public class DebateAppMain extends Application {
 		DirectoryChooser chooser = new DirectoryChooser();
 		chooser.setTitle("Export to multiple PNGs");
 		File file = chooser.showDialog(mainStage);
-		if(file==null)
+		if (file == null) {
+			AppUtils.logger.info("Selected file was null, export aborted");
 			return;
-
-		try {
-			editorExportHandler.saveToImages("png", file);
-		} catch(IOException ioException) {
-			AppUtils.showExceptionDialog(ioException);
 		}
+
+		editorExportHandler.saveToImages("png", file);
 	}));
 	//////Export
 	final Action        exportAction         = new Action("Export", e -> Platform.runLater(() -> {
+		AppUtils.logger.info("Started combined file export");
 		FileChooser chooser = new FileChooser();
 		chooser.setTitle("Export");
-		chooser.getExtensionFilters().addAll(pngFileFilter, tiffFileFilter); //TODO add docx
+		chooser.getExtensionFilters().addAll(pngFileFilter, tiffFileFilter, docxFileFilter);
 		chooser.setSelectedExtensionFilter(pngFileFilter);
 		File file = chooser.showSaveDialog(mainStage);
-		if(file==null)
+		if (file == null) {
+			AppUtils.logger.info("Selected file was null, export aborted");
 			return;
+		}
+		final File finalFile = file;
+		if (chooser.getSelectedExtensionFilter().getExtensions().stream()
+						.noneMatch(extension -> finalFile.getPath().toLowerCase()
+										.endsWith(extension.substring(1).toLowerCase()))) {
+			AppUtils.logger.info("File path does not contain extension, added \"" + chooser.getSelectedExtensionFilter()
+							.getExtensions().get(0) + '\"');
+			file = new File(file.getPath() + chooser.getSelectedExtensionFilter().getExtensions().get(0));
+		}
 
 		try {
-			if(chooser.getSelectedExtensionFilter().equals(pngFileFilter)) {
+			if (chooser.getSelectedExtensionFilter().equals(pngFileFilter)) {
+				AppUtils.logger.info("");
 				editorExportHandler.saveToBigPNG(file);
-			} else if(chooser.getSelectedExtensionFilter().equals(tiffFileFilter)) {
+			} else if (chooser.getSelectedExtensionFilter().equals(tiffFileFilter)) {
+				AppUtils.logger.info("");
 				editorExportHandler.saveToTiff(file);
-			} else if(chooser.getSelectedExtensionFilter().equals(docxFileFilter)) {
+			} else if (chooser.getSelectedExtensionFilter().equals(docxFileFilter)) {
+				AppUtils.logger.info("");
 				editorExportHandler.saveToDOCX(file);
+			} else {
+				AppUtils.logger.info("");
 			}
-		} catch(IOException ex) {
+		} catch (IOException | Docx4JException ex) {
 			AppUtils.showExceptionDialog(ex);
 		}
 	}));
@@ -243,10 +272,6 @@ public class DebateAppMain extends Application {
 	//root layout
 	final BorderPane root      = new BorderPane(flowEditor, top, null, bottom, null);
 	final Scene      mainScene = new Scene(root);
-
-	public DebateAppMain() {
-		instance = this;
-	}
 
 	public static void main(String[] args) {
 		AppUtils.logger.info("Starting with args: " + Arrays.toString(args));

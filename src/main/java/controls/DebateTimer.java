@@ -136,20 +136,4 @@ public class DebateTimer extends Region {
 			button.setStyle("-fx-background-color: BAD77A;");
 		});
 	}
-
-	public Button getButton() {
-		return button;
-	}
-
-	public Label getLabel() {
-		return label;
-	}
-
-	public TextField getField() {
-		return timerField;
-	}
-
-	public Node getGraphic() {
-		return graphic;
-	}
 }

@@ -1,8 +1,21 @@
 package main.java;
 
 import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.image.WritableImage;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import main.java.controls.FlowEditor;
+import main.java.controls.MinimalHTMLEditor;
+import org.apache.commons.io.output.StringBuilderWriter;
+import org.docx4j.convert.in.xhtml.XHTMLImporterImpl;
+import org.docx4j.openpackaging.exceptions.Docx4JException;
+import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.w3c.tidy.Tidy;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -12,31 +25,17 @@ import javax.imageio.stream.ImageOutputStream;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
+import java.io.Reader;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ExportHandler {
-	private final FlowEditor                   editor;
+	private final FlowEditor editor;
 
 	public ExportHandler(FlowEditor editor) {
 		this.editor = editor;
-	}
-
-	private BufferedImage[] getBufferedImages() {
-		var editors = editor.getOrderedEditors();
-		var writableImages = new WritableImage[editors.size()];
-		var bufferedImages = new BufferedImage[editors.size()];
-
-		int page = editor.getCurrentPage();
-		editor.getChildren().setAll(editor.getFlowEditorPages());
-		for(int i = 0; i<editors.size(); i++) {
-			writableImages[i] = editors.get(i).snapshot();
-			bufferedImages[i] = SwingFXUtils.fromFXImage(writableImages[i],
-							new BufferedImage((int) writableImages[i].getWidth(), (int) writableImages[i].getHeight(),
-											BufferedImage.TYPE_INT_RGB));
-		}
-		editor.setPage(page);
-
-		return bufferedImages;
 	}
 
 	/**
@@ -44,87 +43,194 @@ public class ExportHandler {
 	 *                  accepts: png, jpg, gif, tif
 	 * @param directory parent directory to store images
 	 */
-	public void saveToImages(String type, File directory) throws IOException {
-		BufferedImage[] bufferedImages = getBufferedImages();
+	public void saveToImages(String type, File directory) {
+		//Validate image type
+		if (!("png jpg gif tif").contains(type.toLowerCase()))
+			throw new IllegalArgumentException("Accepted file types are \"png\", \"jpg\", \"gif\", or \"tif\"");
 
-		for(int i = 0; i<bufferedImages.length; i++) {
-			ImageIO.write(bufferedImages[i], type,
-							new File(directory.getPath() + File.separatorChar + editor.debateEventProperty().getValue()
-											.getName() + "_" + editor.getOrderedSpeeches().get(i) + '.' + type));
-		}
+		ArrayList<MinimalHTMLEditor> editors = editor.getOrderedEditors();
+		List<VBox> columns = editors.stream().map((MinimalHTMLEditor e) -> new VBox(e.getEditorLabel(), e.getWebView()))
+						.collect(Collectors.toList());
 
-		AppUtils.logger.info("Exported as " + type + " to " + directory.getAbsolutePath());
+		Dialog<ButtonType> previewDialog = generatePreviewDialog(columns);
+		previewDialog.setOnCloseRequest(event -> {
+			if (previewDialog.getResult().equals(ButtonType.OK)) {
+				BufferedImage[] bufferedImages = generateBufferedImages(editors, columns);
+
+				//Save each file
+				for (int i = 0; i < bufferedImages.length; i++) {
+					try {
+						ImageIO.write(bufferedImages[i], type,
+										new File(directory.getPath() + File.separatorChar + editor.debateEventProperty()
+														.getValue().getName() + "_" + editor.getOrderedSpeeches()
+														.get(i) + '.' + type));
+					} catch (IOException e) {
+						AppUtils.showExceptionDialog(e);
+					}
+				}
+
+				//Log completion
+				AppUtils.logger.info("Exported as a group of " + type + " images to " + directory.getAbsolutePath());
+			} else
+				AppUtils.logger.info(type + " export cancelled");
+		});
 	}
 
 	/**
-	 * @param file
-	 * @throws IOException
+	 * @param file Where to save the generated TIFF image
 	 */
-	public void saveToTiff(File file) throws IOException {
-		BufferedImage[] bufferedImages= getBufferedImages();
+	public void saveToTiff(File file) {
+		ArrayList<MinimalHTMLEditor> editors = editor.getOrderedEditors();
+		List<VBox> columns = editors.stream().map((MinimalHTMLEditor e) -> new VBox(e.getEditorLabel(), e.getWebView()))
+						.collect(Collectors.toList());
 
-		// Obtain a TIFF writer
-		ImageWriter writer = ImageIO.getImageWritersByFormatName("TIFF").next();
+		Dialog<ButtonType> previewDialog = generatePreviewDialog(columns);
+		previewDialog.setOnCloseRequest(event -> {
+			if (previewDialog.getResult().equals(ButtonType.OK)) {
+				BufferedImage[] bufferedImages = generateBufferedImages(editors, columns);
 
-		ImageOutputStream output = ImageIO.createImageOutputStream(file);
-		writer.setOutput(output);
+				try {
+				// Get an instance of the TIFF writer
+				ImageWriter writer = ImageIO.getImageWritersByFormatName("TIFF").next();
 
-		ImageWriteParam params = writer.getDefaultWriteParam();
-		params.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+				// Get an output stream for the output file and link it to the writer
+				ImageOutputStream output = ImageIO.createImageOutputStream(file);
+				writer.setOutput(output);
 
-		// Compression: None, PackBits, ZLib, Deflate, LZW, JPEG and CCITT variants allowed
-		// (different plugins may use a different set of compression type names)
-		params.setCompressionType("LZW");
+				// Set compression level of the writer
+				ImageWriteParam params = writer.getDefaultWriteParam();
+				params.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+				params.setCompressionType(
+								"LZW"); // Compression: None, PackBits, ZLib, Deflate, LZW, JPEG and CCITT variants allowed
 
-		writer.prepareWriteSequence(null);
+					// Prepares the writer
+					writer.prepareWriteSequence(null);
 
-		for(BufferedImage image : bufferedImages) {
-			writer.writeToSequence(new IIOImage(image, null, null), params);
-		}
+					// Sends the individual panes to the writer
+					for (BufferedImage image : bufferedImages) {
+						writer.writeToSequence(new IIOImage(image, null, null), params);
+					}
 
-		// We're done
-		writer.endWriteSequence();
+					//Finish off the writer and output stream
+					writer.endWriteSequence();
+					writer.dispose();
+					output.close();
+				} catch (IOException e) {
+					AppUtils.showExceptionDialog(e);
+				}
 
-		writer.dispose();
+				// Log completion
+				AppUtils.logger.info("Exported as a paginated TIFF to " + file.getAbsolutePath());
+			} else
+				AppUtils.logger.info("TIFF export cancelled");
+		});
+	}
 
-		AppUtils.logger.info("Exported as TIFF to " + file.getAbsolutePath());
+	private Dialog<ButtonType> generatePreviewDialog(List<VBox> columns) {
+		HBox previewRoot = new HBox();
+		previewRoot.getChildren().addAll(columns);
+
+		Dialog<ButtonType> previewDialog = new Dialog<>();
+		previewDialog.getDialogPane().getButtonTypes().setAll(ButtonType.OK, ButtonType.CANCEL);
+		Pane transparentLayer = new Pane();
+		transparentLayer.setOpacity(0);
+		previewDialog.getDialogPane().setContent(new StackPane(previewRoot, transparentLayer));
+		previewDialog.initOwner(DebateAppMain.instance.mainScene.getWindow());
+		previewDialog.initModality(Modality.APPLICATION_MODAL);
+		previewDialog.setX(15);
+		previewDialog.setY(15);
+		previewDialog.setTitle("Preview");
+		previewDialog.show();
+		return previewDialog;
 	}
 
 	/**
-	 * @param file
-	 * @throws IOException
+	 * @param file Where to save the generated TIFF image
 	 */
-	public void saveToBigPNG(File file) throws IOException {
-		BufferedImage[] bufferedImages= getBufferedImages();
+	public void saveToBigPNG(File file) {
+		ArrayList<MinimalHTMLEditor> editors = editor.getOrderedEditors();
+		List<VBox> columns = editors.stream().map((MinimalHTMLEditor e) -> new VBox(e.getEditorLabel(), e.getWebView()))
+						.collect(Collectors.toList());
 
-		int height = 0;
-		int width = 0;
-		for(BufferedImage image : bufferedImages) {
-			height = Math.max(height, image.getHeight());
-			width += image.getWidth();
-		}
+		Dialog<ButtonType> previewDialog = generatePreviewDialog(columns);
+		previewDialog.setOnCloseRequest(event -> {
+			if (previewDialog.getResult().equals(ButtonType.OK)) {
+				BufferedImage[] bufferedImages = generateBufferedImages(editors, columns);
 
-		BufferedImage result = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-		int x = 0;
-		int y = 0;
-		for(BufferedImage image : bufferedImages) {
-			result.getGraphics().drawImage(image, x, y, null);
-			x += image.getWidth();
-		}
+				//Sets width to the sum of all the panes and the height to the greatest of any individual pane
+				int height = 0;
+				int width = 0;
+				for (BufferedImage image : bufferedImages) {
+					height = Math.max(height, image.getHeight());
+					width += image.getWidth();
+				}
 
-		ImageIO.write(result, "png", file);
+				// Draws all the pane snapshots onto one large image
+				BufferedImage result = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+				int x = 0;
+				int y = 0;
+				for (BufferedImage image : bufferedImages) {
+					result.getGraphics().drawImage(image, x, y, null);
+					x += image.getWidth();
+				}
 
-		AppUtils.logger.info("Exported as big PNG to " + file.getAbsolutePath());
+				// Saves the combined image
+				try {
+					ImageIO.write(result, "png", file);
+				} catch (IOException e) {
+					AppUtils.showExceptionDialog(e);
+				}
+
+				// Log completion
+				AppUtils.logger.info("Exported as a combined PNG to " + file.getAbsolutePath());
+			} else
+				AppUtils.logger.info("PNG export cancelled");
+		});
 	}
 
-	public void saveToDOCX(File file) {
-		var editors = editor.getOrderedEditors();
-		var htmlTexts = new String[editors.size()];
-
-		for(int i = 0; i<editors.size(); i++) {
-			htmlTexts[i] = editors.get(i).getHtmlText();
+	private BufferedImage[] generateBufferedImages(ArrayList<MinimalHTMLEditor> editors, List<VBox> columns) {
+		WritableImage[] writableImages = new WritableImage[editors.size()];
+		BufferedImage[] bufferedImages = new BufferedImage[editors.size()];
+		for (int i = 0; i < editors.size(); i++) {
+			writableImages[i] = columns.get(i).snapshot(null,
+							new WritableImage((int) columns.get(i).getWidth(), (int) columns.get(i).getHeight()));
+			bufferedImages[i] = SwingFXUtils.fromFXImage(writableImages[i],
+							new BufferedImage((int) writableImages[i].getWidth(), (int) writableImages[i].getHeight(),
+											BufferedImage.TYPE_INT_RGB));
 		}
-		System.out.println("This is supposed to save " + Arrays.toString(htmlTexts) + " as a docx");//TODO implement
+		return bufferedImages;
+	}
+
+	public void saveToDOCX(File file) throws IOException, Docx4JException {
+		ArrayList<MinimalHTMLEditor> editors = editor.getOrderedEditors();
+		String[] htmlTexts = new String[editors.size()];
+
+		for (int i = 0; i < editors.size(); i++) {
+			htmlTexts[i] = "<h1>" + editors.get(i).getEditorLabel().getText() + "</h1>" + editors.get(i).getHtmlText();
+		}
+
+		String fullHtmlText = String.join("\n", htmlTexts);
+
+		Tidy tidy = new Tidy();
+		tidy.setXHTML(true);
+
+		Reader targetReader = new StringReader(fullHtmlText);
+		StringBuilderWriter writer = new StringBuilderWriter();
+
+		tidy.parse(targetReader, writer);
+		String xhtmlText = writer.toString();
+
+		targetReader.close();
+		writer.close();
+
+		// To docx, with content controls
+		WordprocessingMLPackage wordMLPackage = WordprocessingMLPackage.createPackage();
+
+		XHTMLImporterImpl XHTMLImporter = new XHTMLImporterImpl(wordMLPackage);
+
+		wordMLPackage.getMainDocumentPart().getContent().addAll(XHTMLImporter.convert(xhtmlText, null));
+
+		wordMLPackage.save(file);
 
 		AppUtils.logger.info("Exported as docx to " + file.getAbsolutePath());
 	}

@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.IllegalFormatException;
 
+//TODO reimplement
 public class FlowEditor extends Pane {
 	private final IntegerProperty currentPage = new SimpleIntegerProperty(0);
 
@@ -151,15 +152,15 @@ public class FlowEditor extends Pane {
 			if(hBoxStringBuilder.indexOf("h:")==0) {
 				hBoxStringBuilder.delete(0, 2);
 				int endIndex = hBoxStringBuilder.indexOf("h");
-				if(endIndex==-1)
+				if (endIndex == -1)
 					endIndex = hBoxStringBuilder.length();
 				Speech speech = event.getSpeeches().get(Integer.parseInt(hBoxStringBuilder.substring(0, endIndex)));
-				MinimalHTMLEditor htmlEditor = new MinimalHTMLEditor();
 				Label label = new Label(speech.getName());
+				MinimalHTMLEditor htmlEditor = new MinimalHTMLEditor(label);
 				htmlEditor.toolbarsVisiblePropertyProperty().bind(DebateAppMain.settings.toolbarsVisibleProperty);
 				htmlEditor.prefHeightProperty().bind(heightProperty().subtract(label.heightProperty()));
 				htmlEditor.prefWidthProperty().bind(editorWidthExpression);
-				htmlEditor.setHtmlText(defaultText.getOrDefault(speech.getName(), ""));
+				//				htmlEditor.setHtmlText(defaultText.getOrDefault(speech.getName(), ""));
 				editorHashMap.put(speech, htmlEditor);
 				orderedEditors.add(htmlEditor);
 				orderedSpeeches.add(speech);

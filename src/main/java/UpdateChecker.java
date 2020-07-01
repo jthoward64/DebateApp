@@ -17,13 +17,15 @@ public class UpdateChecker {
 	public UpdateChecker(Version current) throws IOException {
 		this.current = current;
 
+		AppUtils.logger.info("Checking version " + current + " against GitHub");
 		URLConnection connection = new URL("https://github.com/tajetaje/DebateApp/releases/latest").openConnection();
 		connection.connect();
-		InputStream connectionInputStream = connection.getInputStream();
-		latestVersion = new Version(connection.getURL().toExternalForm()
-						.substring(connection.getURL().toExternalForm().lastIndexOf('/') + 1));
+		AppUtils.logger.info("Connection requested");
 
-		connectionInputStream.close();
+		AppUtils.logger.info("Latest version url is " + connection.getURL().toExternalForm());
+		latestVersion = new Version(connection.getURL().toExternalForm().substring(connection.getURL().toExternalForm().lastIndexOf('/') + 1));
+
+		AppUtils.logger.info("GitHub reports " + latestVersion + " is latest");
 	}
 
 	public boolean check() {

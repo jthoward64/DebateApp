@@ -365,13 +365,13 @@ public class DebateAppMain extends Application {
 							"Enjoy!");
 			infoAlert.showAndWait();
 		}
+		checkForUpdate();
 	}
 
 	@Override public void stop() throws IOException {
 		settings.save();
 	}
 
-	//TODO fix
 	public void checkForUpdate() {
 		try {
 			AppUtils.logger.info("Checking if latest release is newer than " + VERSION);
@@ -394,7 +394,6 @@ public class DebateAppMain extends Application {
 			}
 		} catch (IOException e) {
 			AppUtils.logger.warning("Update Check failed");
-			AppUtils.showExceptionDialog(e);
 		}
 	}
 }

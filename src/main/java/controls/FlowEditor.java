@@ -8,6 +8,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.util.Pair;
 import main.java.DebateAppMain;
 import main.java.structures.DebateEvent;
 import main.java.structures.Speech;
@@ -15,18 +16,18 @@ import main.java.structures.Speech;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.IllegalFormatException;
+import java.util.List;
+import java.util.stream.Collectors;
 
-//TODO reimplement
 public class FlowEditor extends Pane {
 	private final IntegerProperty currentPage = new SimpleIntegerProperty(0);
 
-	private final SimpleStringProperty              layoutStringProperty = new SimpleStringProperty();
-	private final SimpleObjectProperty<DebateEvent> eventProperty        = new SimpleObjectProperty<>();
+	private final SimpleIntegerProperty currentLayout;
+	private final SimpleObjectProperty<DebateEvent> currentEvent;
 
 	private final ArrayList<Pane> flowEditorPages = new ArrayList<>();
 
-	private final ArrayList<MinimalHTMLEditor>       orderedEditors  = new ArrayList<>();
-	private final ArrayList<Speech>                  orderedSpeeches = new ArrayList<>();
+	private final ArrayList<Pair<Speech, MinimalHTMLEditor>>       orderedEditorSpeechPairs  = new ArrayList<>();
 	private final HashMap<Speech, MinimalHTMLEditor> editorHashMap   = new HashMap<>();
 
 	private final DoubleExpression editorWidthExpression = new DoubleExpression() {
@@ -50,8 +51,14 @@ public class FlowEditor extends Pane {
 		}
 	};
 
-	public FlowEditor(String defaultLayoutString, DebateEvent defaultEvent) {
-		parseLayoutString(defaultLayoutString, defaultEvent, new HashMap<>());
+	public FlowEditor(int defaultLayout, SimpleObjectProperty<DebateEvent> currentEvent) {
+		currentLayout = new SimpleIntegerProperty(defaultLayout);
+		this.currentEvent = currentEvent;
+
+		currentLayout.addListener((observable, oldValue, newValue) -> refreshLayout());
+		currentEvent.addListener(((observable, oldValue, newValue) -> refreshLayout()));
+
+		refreshLayout();
 	}
 
 	public void setPage(int pageIndex) {
@@ -67,7 +74,7 @@ public class FlowEditor extends Pane {
 	}
 
 	public String getLayoutString() {
-		return layoutStringProperty.getValue();
+		return currentEvent.get().getLayouts()[currentLayout.get()];
 	}
 
 	public int getCurrentPage() {
@@ -79,15 +86,19 @@ public class FlowEditor extends Pane {
 	}
 
 	public ObjectProperty<DebateEvent> debateEventProperty() {
-		return eventProperty;
+		return currentEvent;
 	}
 
-	public ArrayList<MinimalHTMLEditor> getOrderedEditors() {
-		return orderedEditors;
+	public SimpleIntegerProperty currentLayoutProperty() {
+		return currentLayout;
 	}
 
-	public ArrayList<Speech> getOrderedSpeeches() {
-		return orderedSpeeches;
+	public List<MinimalHTMLEditor> getOrderedEditors() {
+		return orderedEditorSpeechPairs.stream().map(Pair::getValue).collect(Collectors.toList());
+	}
+
+	public List<Speech> getOrderedSpeeches() {
+		return orderedEditorSpeechPairs.stream().map(Pair::getKey).collect(Collectors.toList());
 	}
 
 	public HashMap<Speech, MinimalHTMLEditor> getEditorHashMap() {
@@ -113,26 +124,17 @@ public class FlowEditor extends Pane {
 	 * For example <code>"[h:"Pro Constructive"h:"Con Constructive"][h:"Con Constructive"h:"Pro Constructive"]"</code> would generate
 	 * two HBoxes, one with pro first and the other with con first<br>
 	 *
-	 * @param layoutString A string of characters that represents a particular layout for the FlowEditor to parse into
-	 *                     an actual layout of HTMLEditors, Labels, and Boxes
-	 * @param event        The event associated with this layout
 	 * @throws IllegalFormatException if any part of layoutString is invalid
 	 */
-	public void parseLayoutString(String layoutString, DebateEvent event, HashMap<String, String> defaultText)
-					throws IllegalFormatException {
+	public void refreshLayout() {
 		flowEditorPages.clear();
-		orderedEditors.clear();
-		orderedSpeeches.clear();
-		editorHashMap.clear();
+		orderedEditorSpeechPairs.clear();
 
-		eventProperty.setValue(event);
-		layoutStringProperty.setValue(layoutString);
-
-		StringBuilder layoutStringBuilder = new StringBuilder(layoutString);
+		StringBuilder layoutStringBuilder = new StringBuilder(getLayoutString());
 		while(layoutStringBuilder.length()>0) {
-			if(layoutString.charAt(0)=='[') {
+			if(getLayoutString().charAt(0)=='[') {
 				int endIndex = layoutStringBuilder.indexOf("]");
-				flowEditorPages.add(parseBoxString(layoutStringBuilder.substring(1, endIndex), event, defaultText));
+				flowEditorPages.add(parseBoxString(layoutStringBuilder.substring(1, endIndex), debateEventProperty().get()));
 				layoutStringBuilder.delete(0, endIndex + 1);
 			}
 		}
@@ -140,10 +142,31 @@ public class FlowEditor extends Pane {
 		setPage(0);
 	}
 
+//	public void parseLayoutString(String layoutString, DebateEvent event)
+//					throws IllegalFormatException {
+//		flowEditorPages.clear();
+//		orderedEditors.clear();
+//		orderedSpeeches.clear();
+//		editorHashMap.clear();
+//
+//		eventProperty.setValue(event);
+//
+//		StringBuilder layoutStringBuilder = new StringBuilder(layoutString);
+//		while(layoutStringBuilder.length()>0) {
+//			if(layoutString.charAt(0)=='[') {
+//				int endIndex = layoutStringBuilder.indexOf("]");
+//				flowEditorPages.add(parseBoxString(layoutStringBuilder.substring(1, endIndex), event));
+//				layoutStringBuilder.delete(0, endIndex + 1);
+//			}
+//		}
+//
+//		setPage(0);
+//	}
+
 	/**
 	 * Parses the contents of [...] in a layout String for the parseLayoutString method
 	 */
-	private HBox parseBoxString(String hBoxString, DebateEvent event, HashMap<String, String> defaultText) {
+	private HBox parseBoxString(String hBoxString, DebateEvent event) {
 		HBox box = new HBox();
 		box.prefHeightProperty().bind(heightProperty());
 		box.prefWidthProperty().bind(widthProperty());
@@ -155,16 +178,16 @@ public class FlowEditor extends Pane {
 				if (endIndex == -1)
 					endIndex = hBoxStringBuilder.length();
 				Speech speech = event.getSpeeches().get(Integer.parseInt(hBoxStringBuilder.substring(0, endIndex)));
-				Label label = new Label(speech.getName());
-				MinimalHTMLEditor htmlEditor = new MinimalHTMLEditor(label);
-				htmlEditor.toolbarsVisiblePropertyProperty().bind(DebateAppMain.settings.toolbarsVisibleProperty);
-				htmlEditor.prefHeightProperty().bind(heightProperty().subtract(label.heightProperty()));
-				htmlEditor.prefWidthProperty().bind(editorWidthExpression);
-				//				htmlEditor.setHtmlText(defaultText.getOrDefault(speech.getName(), ""));
-				editorHashMap.put(speech, htmlEditor);
-				orderedEditors.add(htmlEditor);
-				orderedSpeeches.add(speech);
-				box.getChildren().add(new VBox(label, htmlEditor));
+				if(!editorHashMap.containsKey(speech)) {
+					Label label = new Label(speech.getName());
+					MinimalHTMLEditor htmlEditor = new MinimalHTMLEditor(label);
+					htmlEditor.toolbarsVisiblePropertyProperty().bind(DebateAppMain.settings.toolbarsVisibleProperty);
+					htmlEditor.prefHeightProperty().bind(heightProperty().subtract(label.heightProperty()));
+					htmlEditor.prefWidthProperty().bind(editorWidthExpression);
+					editorHashMap.put(speech, htmlEditor);
+				}
+				orderedEditorSpeechPairs.add(new Pair<>(speech, editorHashMap.get(speech)));
+				box.getChildren().add(new VBox(editorHashMap.get(speech).getEditorLabel(), editorHashMap.get(speech)));
 				hBoxStringBuilder.delete(0, endIndex);
 			}
 		}

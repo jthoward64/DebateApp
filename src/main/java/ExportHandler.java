@@ -48,7 +48,7 @@ public class ExportHandler {
 		if (!("png jpg gif tif").contains(type.toLowerCase()))
 			throw new IllegalArgumentException("Accepted file types are \"png\", \"jpg\", \"gif\", or \"tif\"");
 
-		ArrayList<MinimalHTMLEditor> editors = editor.getOrderedEditors();
+		List<MinimalHTMLEditor> editors = editor.getOrderedEditors();
 		List<VBox> columns = editors.stream().map((MinimalHTMLEditor e) -> new VBox(e.getEditorLabel(), e.getWebView()))
 						.collect(Collectors.toList());
 
@@ -80,7 +80,7 @@ public class ExportHandler {
 	 * @param file Where to save the generated TIFF image
 	 */
 	public void saveToTiff(File file) {
-		ArrayList<MinimalHTMLEditor> editors = editor.getOrderedEditors();
+		List<MinimalHTMLEditor> editors = editor.getOrderedEditors();
 		List<VBox> columns = editors.stream().map((MinimalHTMLEditor e) -> new VBox(e.getEditorLabel(), e.getWebView()))
 						.collect(Collectors.toList());
 
@@ -148,7 +148,7 @@ public class ExportHandler {
 	 * @param file Where to save the generated TIFF image
 	 */
 	public void saveToBigPNG(File file) {
-		ArrayList<MinimalHTMLEditor> editors = editor.getOrderedEditors();
+		List<MinimalHTMLEditor> editors = editor.getOrderedEditors();
 		List<VBox> columns = editors.stream().map((MinimalHTMLEditor e) -> new VBox(e.getEditorLabel(), e.getWebView()))
 						.collect(Collectors.toList());
 
@@ -188,7 +188,7 @@ public class ExportHandler {
 		});
 	}
 
-	private BufferedImage[] generateBufferedImages(ArrayList<MinimalHTMLEditor> editors, List<VBox> columns) {
+	private BufferedImage[] generateBufferedImages(List<MinimalHTMLEditor> editors, List<VBox> columns) {
 		WritableImage[] writableImages = new WritableImage[editors.size()];
 		BufferedImage[] bufferedImages = new BufferedImage[editors.size()];
 		for (int i = 0; i < editors.size(); i++) {
@@ -202,7 +202,7 @@ public class ExportHandler {
 	}
 
 	public void saveToDOCX(File file) throws IOException, Docx4JException {
-		ArrayList<MinimalHTMLEditor> editors = editor.getOrderedEditors();
+		List<MinimalHTMLEditor> editors = editor.getOrderedEditors();
 		String[] htmlTexts = new String[editors.size()];
 
 		for (int i = 0; i < editors.size(); i++) {

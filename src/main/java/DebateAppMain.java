@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
+import javafx.concurrent.Task;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -33,7 +34,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.concurrent.ExecutionException;
 
 /**
  * <div>Some icons made by <a href="https://www.flaticon.com/authors/freepik" title=
@@ -75,8 +76,7 @@ public class DebateAppMain extends Application {
 	final BorderPane             bottom                     = new BorderPane(mainTimerBox, null, conPrep, null, proPrep);
 
 	//Center
-	final FlowEditor flowEditor = new FlowEditor(currentEvent.getValue().getLayouts()[Layouts.RELATED],
-					currentEvent.getValue());
+	final FlowEditor flowEditor = new FlowEditor(Layouts.RELATED,	currentEvent);
 
 	//Menu
 	////File
@@ -204,17 +204,13 @@ public class DebateAppMain extends Application {
 
 	////View
 	final Action relatedLayoutAction = new Action("Related speeches layout",
-					e -> flowEditor.parseLayoutString(currentEvent.getValue().getLayouts()[Layouts.RELATED],
-									currentEvent.getValue(), new HashMap<>()));
+					e -> flowEditor.currentLayoutProperty().setValue(Layouts.RELATED));
 	final Action proConLayoutAction  = new Action("Pro/Con layout",
-					e -> flowEditor.parseLayoutString(currentEvent.getValue().getLayouts()[Layouts.PRO_CON],
-									currentEvent.getValue(), new HashMap<>()));
+					e -> flowEditor.currentLayoutProperty().setValue(Layouts.PRO_CON));
 	final Action singleLayoutAction  = new Action("Single speech layout",
-					e -> flowEditor.parseLayoutString(currentEvent.getValue().getLayouts()[Layouts.SINGLE],
-									currentEvent.getValue(), new HashMap<>()));
-	final Action allLayoutAction     = new Action("Pro/Con layout",
-					e -> flowEditor.parseLayoutString(currentEvent.getValue().getLayouts()[Layouts.ALL],
-									currentEvent.getValue(), new HashMap<>()));
+					e -> flowEditor.currentLayoutProperty().setValue(Layouts.SINGLE));
+	final Action allLayoutAction     = new Action("All speeches layout",
+					e -> flowEditor.currentLayoutProperty().setValue(Layouts.ALL));
 	final Action nextPage            = new Action("Next Page", e -> flowEditor.nextPage());
 	final Menu   viewMenu            = new Menu("View", null, ActionUtils.createMenuItem(relatedLayoutAction),
 					ActionUtils.createMenuItem(proConLayoutAction), ActionUtils.createMenuItem(singleLayoutAction),
@@ -223,16 +219,12 @@ public class DebateAppMain extends Application {
 
 	////Event
 	final Action nextEventAction = new Action("Next Event", e -> {
-		Alert warningAlert = new Alert(Alert.AlertType.WARNING, "This will clear your flow, are you sure you want to continue?", ButtonType.YES, ButtonType.NO);
-		if(warningAlert.showAndWait().orElse(ButtonType.NO).equals(ButtonType.YES)) {
-			mainTimerSpeechSelectorBox.getSelectionModel().clearSelection();
-			int index = events.getEvents().indexOf(currentEvent.getValue()) + 1;
-			if(index>(events.getEvents().size() - 1))
-				index = 0;
-			currentEvent.setValue(events.getEvents().get(index));
-			mainTimerSpeechSelectorBox.setItems(FXCollections.observableArrayList(currentEvent.getValue().getSpeeches()));
-			flowEditor.parseLayoutString(currentEvent.getValue().getLayouts()[0], currentEvent.getValue(), new HashMap<>());
-		}
+		mainTimerSpeechSelectorBox.getSelectionModel().clearSelection();
+		int index = events.getEvents().indexOf(currentEvent.getValue()) + 1;
+		if(index>(events.getEvents().size() - 1))
+			index = 0;
+		currentEvent.setValue(events.getEvents().get(index));
+		mainTimerSpeechSelectorBox.setItems(FXCollections.observableArrayList(currentEvent.getValue().getSpeeches()));
 	});
 	final Action editTimesAction = new Action("Edit times", e -> currentEvent.getValue()
 					.setTimesFromString(new SpeechTimesDialog(currentEvent.getValue()).showAndWait().
@@ -363,9 +355,10 @@ public class DebateAppMain extends Application {
 							"\t\t\tControl (Command) + Space\n" +
 							"It will go to the next page of speeches\n" +
 							"Enjoy!");
-			infoAlert.showAndWait();
+			Platform.runLater(infoAlert::showAndWait);
 		}
-		checkForUpdate();
+
+		Platform.runLater(this::checkForUpdate);
 	}
 
 	@Override public void stop() throws IOException {
@@ -373,27 +366,38 @@ public class DebateAppMain extends Application {
 	}
 
 	public void checkForUpdate() {
-		try {
-			AppUtils.logger.info("Checking if latest release is newer than " + VERSION);
-			UpdateChecker checker = new UpdateChecker(VERSION);
-			if(checker.check()) {
-				AppUtils.logger.info("Found new version");
-				checker.showUpdateAlert();
-			} else {
-				AppUtils.logger.info("Didn't find new version");
-				Popup noUpdatePopup = new Popup();
-				Label topLabel = new Label("No updates found");
-				topLabel.setStyle("-fx-background-color: #BAD77A; -fx-font-size: 24;");
-				Label bottomLabel = new Label("Click anywhere to continue");
-				bottomLabel.setStyle("-fx-font-size: 10;");
-				VBox vbox = new VBox(topLabel, bottomLabel);
-				vbox.setAlignment(Pos.CENTER);
-				noUpdatePopup.getContent().setAll(vbox);
-				noUpdatePopup.setAutoHide(true);
-				Platform.runLater(() -> noUpdatePopup.show(mainStage));
+		final UpdateChecker[] checker = new UpdateChecker[1];
+		Task<Boolean> task = new Task<>() {
+			@Override public Boolean call() throws IOException {
+				checker[0] = new UpdateChecker(VERSION);
+				return checker[0].check();
 			}
-		} catch (IOException e) {
-			AppUtils.logger.warning("Update Check failed");
-		}
+		};
+
+		AppUtils.logger.info("Checking if latest release is newer than " + VERSION);
+		new Thread(task).start();
+		task.setOnSucceeded(event -> {
+			AppUtils.logger.info("Update Check done");
+			try {
+				if (task.get()) {
+					AppUtils.logger.info("Found new version");
+					checker[0].showUpdateAlert();
+				} else {
+					AppUtils.logger.info("Didn't find new version");
+					Popup noUpdatePopup = new Popup();
+					Label topLabel = new Label("No updates found");
+					topLabel.setStyle("-fx-background-color: #BAD77A; -fx-font-size: 24;");
+					Label bottomLabel = new Label("Click anywhere to continue");
+					bottomLabel.setStyle("-fx-font-size: 10;");
+					VBox vbox = new VBox(topLabel, bottomLabel);
+					vbox.setAlignment(Pos.CENTER);
+					noUpdatePopup.getContent().setAll(vbox);
+					noUpdatePopup.setAutoHide(true);
+					Platform.runLater(() -> noUpdatePopup.show(mainStage));
+				}
+			} catch (InterruptedException | ExecutionException e) {
+				AppUtils.logger.warning("Update Check failed");
+			}
+		});
 	}
 }

@@ -352,7 +352,7 @@ public class DebateAppMain extends Application {
 
 		mainStage.show();
 
-		if(AppUtils.firstRun) {
+		if(AppUtils.firstRun || AppSettings.DEBUGMODE) {
 			Alert infoAlert = new Alert(Alert.AlertType.INFORMATION);
 			infoAlert.setTitle("Info dialog");
 			infoAlert.setHeaderText("Welcome to DebateApp");

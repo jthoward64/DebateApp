@@ -12,6 +12,7 @@ import javafx.scene.layout.Priority;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import main.java.structures.AppSettings;
 import org.controlsfx.validation.Severity;
 import org.controlsfx.validation.Validator;
 
@@ -33,7 +34,6 @@ public class AppUtils {
 					.createRegexValidator("Invalid time", "[0-9]{1,2}:[0-9]{1,2}", Severity.ERROR);
 	private static final Logger logger = Logger.getLogger("DebateApp");
 	static {
-
 		try {
 			File appHomeDirectory = new File(getAppHome() + File.separatorChar + "DebateApp-%g.log");
 			if(appHomeDirectory.getParentFile().mkdirs())
@@ -42,7 +42,7 @@ public class AppUtils {
 		} catch(IOException e) {
 			showExceptionDialog(e);
 		}
-		logger.setUseParentHandlers(false);
+		logger.setUseParentHandlers(AppSettings.DEBUGMODE);
 		logger.getHandlers()[0].setFormatter(new SimpleFormatter());
 	}
 

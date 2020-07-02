@@ -13,6 +13,7 @@ import java.util.Properties;
 import java.util.logging.Logger;
 
 public class AppSettings {
+	public static final boolean DEBUGMODE = true;
 
 	public final File appHome;//These should probably be made user definable eventually
 	public final File propertiesFile;

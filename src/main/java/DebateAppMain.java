@@ -300,6 +300,7 @@ public class DebateAppMain extends Application {
 		saveAction.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCodeCombination.SHORTCUT_DOWN));
 		openAction.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCodeCombination.SHORTCUT_DOWN));
 		nextPage.setAccelerator(new KeyCodeCombination(KeyCode.SPACE, KeyCodeCombination.SHORTCUT_DOWN));
+		top.setUseSystemMenuBar(true);
 
 		//Configure bottom
 		mainTimerSpeechSelectorBox.setItems(FXCollections.observableArrayList(currentEvent.getValue().getSpeeches()));

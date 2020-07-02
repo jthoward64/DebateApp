@@ -7,6 +7,7 @@ import javafx.scene.control.Dialog;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
+import main.java.AppUtils;
 import main.java.structures.AppSettings;
 import main.java.structures.DebateEvent;
 import org.controlsfx.control.PropertySheet;
@@ -107,6 +108,8 @@ public class SettingsEditor extends PropertySheet {
 			}
 
 			@Override public void setValue(Object value) {
+				AppUtils.logger.info(
+								"Value of " + getName() + " updated from \"" + getValue() + "\" to \" " + value + '\"');
 				property.setValue((Integer) value);
 			}
 
@@ -139,6 +142,8 @@ public class SettingsEditor extends PropertySheet {
 			}
 
 			@Override public void setValue(Object value) {
+				AppUtils.logger.info(
+								"Value of " + getName() + " updated from \"" + getValue() + "\" to \" " + value + '\"');
 				property.setValue((Double) value);
 			}
 
@@ -171,6 +176,8 @@ public class SettingsEditor extends PropertySheet {
 			}
 
 			@Override public void setValue(Object value) {
+				AppUtils.logger.info(
+								"Value of " + getName() + " updated from \"" + getValue() + "\" to \" " + value + '\"');
 				property.setValue((Boolean) value);
 			}
 
@@ -203,6 +210,8 @@ public class SettingsEditor extends PropertySheet {
 			}
 
 			@Override public void setValue(Object value) {
+				AppUtils.logger.info(
+								"Value of " + getName() + " updated from \"" + getValue() + "\" to \" " + value + '\"');
 				property.setValue((String) value);
 			}
 
@@ -235,6 +244,8 @@ public class SettingsEditor extends PropertySheet {
 			}
 
 			@Override public void setValue(Object value) {
+				AppUtils.logger.info(
+								"Value of " + getName() + " updated from \"" + getValue() + "\" to \" " + value + '\"');
 				property.setValue(enumType.cast(value));
 			}
 

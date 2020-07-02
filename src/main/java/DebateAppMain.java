@@ -331,6 +331,21 @@ public class DebateAppMain extends Application {
 		mainStage.setWidth(settings.defaultWidth.getValue());
 		mainStage.setHeight(settings.defaultHeight.getValue());
 
+		List<String> args = getParameters().getRaw();
+		for(String argument : args) {
+			System.out.println(argument);
+			File file = new File(argument);
+			if(file.exists()) {
+				if(editorSaveHandler==null)
+					editorSaveHandler = new SaveHandler(flowEditor, file);
+				try {
+					editorSaveHandler.open(file, events);
+				} catch(IOException e) {
+					AppUtils.logger.warning("Failed to open " + file.getPath());
+				}
+			}
+		}
+
 		mainStage.show();
 
 		if(AppUtils.firstRun) {

@@ -77,7 +77,7 @@ public class DebateAppMain extends Application {
 	final BorderPane             bottom                     = new BorderPane(mainTimerBox, null, conPrep, null, proPrep);
 
 	//Center
-	final FlowEditor flowEditor = new FlowEditor(Layouts.RELATED,	currentEvent);
+	final FlowEditor flowEditor = new FlowEditor(settings.defaultLayout.get().getIndex(), currentEvent);
 
 	//Menu
 	////File
@@ -205,13 +205,13 @@ public class DebateAppMain extends Application {
 
 	////View
 	final Action relatedLayoutAction = new Action("Related speeches layout",
-					e -> flowEditor.currentLayoutProperty().setValue(Layouts.RELATED));
+					e -> flowEditor.currentLayoutProperty().setValue(Layout.RELATED.getIndex()));
 	final Action proConLayoutAction  = new Action("Pro/Con layout",
-					e -> flowEditor.currentLayoutProperty().setValue(Layouts.PRO_CON));
+					e -> flowEditor.currentLayoutProperty().setValue(Layout.PRO_CON.getIndex()));
 	final Action singleLayoutAction  = new Action("Single speech layout",
-					e -> flowEditor.currentLayoutProperty().setValue(Layouts.SINGLE));
+					e -> flowEditor.currentLayoutProperty().setValue(Layout.SINGLE.getIndex()));
 	final Action allLayoutAction     = new Action("All speeches layout",
-					e -> flowEditor.currentLayoutProperty().setValue(Layouts.ALL));
+					e -> flowEditor.currentLayoutProperty().setValue(Layout.ALL.getIndex()));
 	final Action nextPage            = new Action("Next Page", e -> flowEditor.nextPage());
 	final Menu   viewMenu            = new Menu("View", null, ActionUtils.createMenuItem(relatedLayoutAction),
 					ActionUtils.createMenuItem(proConLayoutAction), ActionUtils.createMenuItem(singleLayoutAction),

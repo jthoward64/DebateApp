@@ -28,7 +28,8 @@ public class AppSettings {
 	public final SimpleDoubleProperty defaultWidth  = new SimpleDoubleProperty();
 	public final SimpleDoubleProperty defaultHeight = new SimpleDoubleProperty();
 
-	public final SimpleObjectProperty<DebateEvent> defaultEvent = new SimpleObjectProperty<>(debateEvents.pf);
+	public final SimpleObjectProperty<DebateEvent> defaultEvent  = new SimpleObjectProperty<>(debateEvents.pf);
+	public final SimpleObjectProperty<Layout>      defaultLayout = new SimpleObjectProperty<>(Layout.RELATED);
 
 	public AppSettings(File appHome) {
 		this.appHome = appHome;
@@ -70,6 +71,8 @@ public class AppSettings {
 		//load default event
 		defaultEvent.setValue(debateEvents.getEvent(properties.getProperty("defEvent", "Public Forum")));
 
+		defaultLayout.setValue(Layout.valueOf(properties.getProperty("defLayout", "RELATED")));
+
 		//load save on exit
 		saveOnExit.setValue(Boolean.parseBoolean(properties.getProperty("saveOnExit", "false")));
 
@@ -109,6 +112,8 @@ public class AppSettings {
 
 		//Save default event
 		properties.setProperty("defEvent", defaultEvent.get().getName());
+
+		properties.setProperty("defLayout", defaultLayout.get().name());
 
 		//Save saveOnExit
 		properties.setProperty("saveOnExit", String.valueOf(saveOnExit.get()));

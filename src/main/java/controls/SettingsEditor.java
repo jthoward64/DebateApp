@@ -10,6 +10,7 @@ import javafx.scene.text.Font;
 import main.java.AppUtils;
 import main.java.structures.AppSettings;
 import main.java.structures.DebateEvent;
+import main.java.structures.Layout;
 import org.controlsfx.control.PropertySheet;
 import org.controlsfx.property.editor.DefaultPropertyEditorFactory;
 import org.controlsfx.property.editor.Editors;
@@ -41,6 +42,9 @@ public class SettingsEditor extends PropertySheet {
 						settings.defaultHeight));
 		getItems().add(buildDoubleItem("Default Width", "Height the app defaults to when it opens (1 for auto)",
 						settings.defaultWidth));
+
+		getItems().add(buildEnumItem("Default layout", "The layout to use when opening the app", settings.defaultLayout,
+						Layout.class));
 
 		getItems().add(new Item() {
 			@Override public Class<?> getType() {

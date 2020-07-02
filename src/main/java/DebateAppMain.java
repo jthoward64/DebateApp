@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -399,16 +400,26 @@ public class DebateAppMain extends Application {
 					checker[0].showUpdateAlert();
 				} else {
 					AppUtils.logger.info("Didn't find new version");
-					Popup noUpdatePopup = new Popup();
-					Label topLabel = new Label("No updates found");
-					topLabel.setStyle("-fx-background-color: #BAD77A; -fx-font-size: 24;");
-					Label bottomLabel = new Label("Click anywhere to continue");
-					bottomLabel.setStyle("-fx-font-size: 10;");
-					VBox vbox = new VBox(topLabel, bottomLabel);
-					vbox.setAlignment(Pos.CENTER);
-					noUpdatePopup.getContent().setAll(vbox);
-					noUpdatePopup.setAutoHide(true);
-					Platform.runLater(() -> noUpdatePopup.show(mainStage));
+					if(settings.showNoUpdateMessage.get()) {
+						Popup noUpdatePopup = new Popup();
+						Label topLabel = new Label("No updates found");
+						topLabel.setStyle("-fx-background-color: #BAD77A; -fx-font-size: 24;");
+						Label bottomLabel = new Label("Click anywhere to continue");
+						bottomLabel.setStyle("-fx-text-fill: #748a86; -fx-font-size: 10;");
+						VBox vbox = new VBox(topLabel, bottomLabel);
+						vbox.setAlignment(Pos.CENTER);
+						noUpdatePopup.getContent().setAll(vbox);
+						noUpdatePopup.setAutoHide(true);
+						noUpdatePopup.getScene().setOnMouseClicked(e -> noUpdatePopup.hide());
+
+						Platform.runLater(() -> {
+							noUpdatePopup.show(mainStage);
+							noUpdatePopup.setX(mainStage.getX() + (mainStage.getWidth() / 2) - (noUpdatePopup
+											.getWidth() / 2));
+							noUpdatePopup.setY(mainStage.getY() + (mainStage.getHeight() / 2) - (noUpdatePopup
+											.getHeight() / 2));
+						});
+					}
 				}
 			} catch (InterruptedException | ExecutionException e) {
 				AppUtils.logger.warning("Update Check failed");

@@ -22,8 +22,11 @@ public class UpdateChecker {
 		connection.connect();
 		AppUtils.logger.info("Connection requested");
 
+		InputStream connectionInputStream = connection.getInputStream();
 		AppUtils.logger.info("Latest version url is " + connection.getURL().toExternalForm());
-		latestVersion = new Version(connection.getURL().toExternalForm().substring(connection.getURL().toExternalForm().lastIndexOf('/') + 1));
+		latestVersion = new Version(connection.getURL().toExternalForm()
+						.substring(connection.getURL().toExternalForm().lastIndexOf('/') + 1));
+		connectionInputStream.close();
 
 		AppUtils.logger.info("GitHub reports " + latestVersion + " is latest");
 	}

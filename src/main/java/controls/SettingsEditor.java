@@ -13,6 +13,7 @@ import org.controlsfx.control.PropertySheet;
 import org.controlsfx.property.editor.DefaultPropertyEditorFactory;
 import org.controlsfx.property.editor.Editors;
 import org.controlsfx.property.editor.PropertyEditor;
+
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Optional;
@@ -27,11 +28,18 @@ public class SettingsEditor extends PropertySheet {
 		setModeSwitcherVisible(false);
 		setSearchBoxVisible(false);
 
-		getItems().add(buildBooleanItem("Save on Exit", "Automatically save every time the app closes", settings.saveOnExit));
-		getItems().add(buildBooleanItem("Show editor toolbars", "Display the toolbar above the flow editor", settings.toolbarsVisibleProperty));
+		getItems().add(buildBooleanItem("Save on Exit", "Automatically save every time the app closes",
+						settings.saveOnExit));
+		getItems().add(buildBooleanItem("Show editor toolbars", "Display the toolbar above the flow editor",
+						settings.toolbarsVisibleProperty));
+		getItems().add(buildBooleanItem("Show \"No Update\" message",
+						"Display a message on startup if the installed version of DebateApp is the latest",
+						settings.showNoUpdateMessage));
 
-		getItems().add(buildDoubleItem("Default Height", "Width the app defaults to when it opens", settings.defaultHeight));
-		getItems().add(buildDoubleItem("Default Width", "Height the app defaults to when it opens", settings.defaultWidth));
+		getItems().add(buildDoubleItem("Default Height", "Width the app defaults to when it opens",
+						settings.defaultHeight));
+		getItems().add(buildDoubleItem("Default Width", "Height the app defaults to when it opens",
+						settings.defaultWidth));
 
 		getItems().add(new Item() {
 			@Override public Class<?> getType() {
@@ -71,8 +79,9 @@ public class SettingsEditor extends PropertySheet {
 		dialog.setTitle("Settings");
 		dialog.getDialogPane().getButtonTypes().setAll(ButtonType.OK);
 		dialog.setResizable(true);
-		dialog.getDialogPane().setMinWidth(350);//350 is the width of a row in the editor, may need to tweak this later
-		dialog.getDialogPane().setMinHeight(42*getItems().size());//Aside from the meaning of life the universe and everything, 42 happens to be the height of a single row
+		dialog.getDialogPane().setMinWidth(400);//350 is the width of a row in the editor, may need to tweak this later
+		dialog.getDialogPane().setMinHeight(42 * getItems()
+						.size());//Aside from the meaning of life the universe and everything, 42 happens to be the height of a single row
 	}
 
 	private PropertySheet.Item buildIntegerItem(String name, String description, SimpleIntegerProperty property){

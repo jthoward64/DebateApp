@@ -21,10 +21,11 @@ public class AppSettings {
 
 	public final DebateEvents debateEvents = new DebateEvents();
 
-	public final SimpleBooleanProperty saveOnExit = new SimpleBooleanProperty(false);
+	public final SimpleBooleanProperty saveOnExit              = new SimpleBooleanProperty(false);
 	public final SimpleBooleanProperty toolbarsVisibleProperty = new SimpleBooleanProperty(true);
+	public final SimpleBooleanProperty showNoUpdateMessage     = new SimpleBooleanProperty(false);
 
-	public final SimpleDoubleProperty defaultWidth = new SimpleDoubleProperty();
+	public final SimpleDoubleProperty defaultWidth  = new SimpleDoubleProperty();
 	public final SimpleDoubleProperty defaultHeight = new SimpleDoubleProperty();
 
 	public final SimpleObjectProperty<DebateEvent> defaultEvent = new SimpleObjectProperty<>(debateEvents.pf);
@@ -69,12 +70,14 @@ public class AppSettings {
 		defaultEvent.setValue(debateEvents.getEvent(properties.getProperty("defEvent", "Public Forum")));
 
 		//load save on exit
-		saveOnExit.setValue(Boolean.parseBoolean(properties.getProperty("saveOnExit", "true")));
+		saveOnExit.setValue(Boolean.parseBoolean(properties.getProperty("saveOnExit", "false")));
 
 		//load toolbar visibility
 		toolbarsVisibleProperty.setValue(Boolean.parseBoolean(properties.getProperty("toolbarsVisible", "true")));
 
-		saveOnExit.setValue(Boolean.parseBoolean(properties.getProperty("saveOnExit", "false")));
+		AppUtils.firstRun = Boolean.parseBoolean(properties.getProperty("firstRun", "true"));
+
+		showNoUpdateMessage.setValue(Boolean.parseBoolean(properties.getProperty("showNoUpdateMessage", "false")));
 
 		AppUtils.allowSave = true;
 
@@ -111,6 +114,10 @@ public class AppSettings {
 
 		//save toolbar visibility
 		properties.setProperty("toolbarsVisible", String.valueOf(toolbarsVisibleProperty.get()));
+
+		properties.setProperty("showNoUpdateMessage", String.valueOf(showNoUpdateMessage.get()));
+
+		properties.setProperty("firstRun", String.valueOf(false));
 
 		properties.store(new FileOutputStream(propertiesFile), "Configuration for tajetaje's DebateApp");
 		AppUtils.allowSave = true;

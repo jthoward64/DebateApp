@@ -28,7 +28,7 @@ import static main.java.DebateAppMain.saveFileFilter;
 public class AppUtils {
 
 	public static       boolean           allowSave     = true;
-	public static       boolean           firstRun      = false;
+	public static       boolean           firstRun      = true;
 	public static final Validator<String> timeValidator = Validator
 					.createRegexValidator("Invalid time", "[0-9]{1,2}:[0-9]{1,2}", Severity.ERROR);
 	public static final Logger            logger        = Logger.getLogger("DebateApp");
@@ -36,7 +36,7 @@ public class AppUtils {
 	static {
 		try {
 			File appHomeDirectory = new File(getAppHome() + File.separatorChar + "DebateApp-%g.log");
-			if(appHomeDirectory.mkdirs())
+			if(appHomeDirectory.getParentFile().mkdirs())
 				Platform.runLater(() -> logger.info("DebateApp directory created by logger initializer"));
 			logger.addHandler(new FileHandler(appHomeDirectory.getAbsolutePath(), 0, 3));
 		} catch(IOException e) {

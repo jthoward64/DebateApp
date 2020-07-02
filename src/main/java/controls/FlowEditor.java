@@ -2,7 +2,10 @@ package main.java.controls;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.DoubleExpression;
-import javafx.beans.property.*;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
@@ -141,27 +144,6 @@ public class FlowEditor extends Pane {
 
 		setPage(0);
 	}
-
-//	public void parseLayoutString(String layoutString, DebateEvent event)
-//					throws IllegalFormatException {
-//		flowEditorPages.clear();
-//		orderedEditors.clear();
-//		orderedSpeeches.clear();
-//		editorHashMap.clear();
-//
-//		eventProperty.setValue(event);
-//
-//		StringBuilder layoutStringBuilder = new StringBuilder(layoutString);
-//		while(layoutStringBuilder.length()>0) {
-//			if(layoutString.charAt(0)=='[') {
-//				int endIndex = layoutStringBuilder.indexOf("]");
-//				flowEditorPages.add(parseBoxString(layoutStringBuilder.substring(1, endIndex), event));
-//				layoutStringBuilder.delete(0, endIndex + 1);
-//			}
-//		}
-//
-//		setPage(0);
-//	}
 
 	/**
 	 * Parses the contents of [...] in a layout String for the parseLayoutString method

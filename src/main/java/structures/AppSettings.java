@@ -53,13 +53,14 @@ public class AppSettings {
 		properties.load(new FileInputStream(propertiesFile));
 
 		//load size
-		defaultWidth.setValue(Double.parseDouble(properties.getProperty("defaultWidth", String.valueOf(defaultWidth.get()))));
-		defaultHeight.setValue(Double.parseDouble(properties.getProperty("defaultHeight", String.valueOf(defaultWidth.get()))));
+		defaultWidth.setValue(Double.parseDouble(properties.getProperty("defaultWidth", "1.0")));
+		defaultHeight.setValue(Double.parseDouble(properties.getProperty("defaultHeight", "1.0")));
 
 		//load times
 		debateEvents.pf.setTimesFromString(properties.getProperty("pfTimes", "240,240,240,240,180,180,180,120,120,"));
 		debateEvents.ld.setTimesFromString(properties.getProperty("ldTimes", "360,420,180,240,360,180,"));
-		debateEvents.policy.setTimesFromString(properties.getProperty("policyTimes", "480,480,180,480,480,300,300,300,300,"));
+		debateEvents.policy.setTimesFromString(
+						properties.getProperty("policyTimes", "480,480,180,480,480,300,300,300,300,"));
 
 		//load prep times
 		debateEvents.pf.setPrepSeconds(Integer.parseInt(properties.getProperty("pfPrep", "180")));

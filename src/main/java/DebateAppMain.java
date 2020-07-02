@@ -57,7 +57,7 @@ public class DebateAppMain extends Application {
 	public static final FileChooser.ExtensionFilter docxFileFilter = new FileChooser.ExtensionFilter("Word document",
 					"*.docx");
 
-	Stage mainStage;
+	public Stage mainStage;
 
 	public static final AppSettings                       settings       = new AppSettings(
 					new File(AppUtils.getAppHome()));
@@ -296,7 +296,8 @@ public class DebateAppMain extends Application {
 		}
 
 		//Configure menu
-		saveAsAction.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCodeCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN));
+		saveAsAction.setAccelerator(
+						new KeyCodeCombination(KeyCode.S, KeyCodeCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN));
 		saveAction.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCodeCombination.SHORTCUT_DOWN));
 		openAction.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCodeCombination.SHORTCUT_DOWN));
 		nextPage.setAccelerator(new KeyCodeCombination(KeyCode.SPACE, KeyCodeCombination.SHORTCUT_DOWN));
@@ -305,7 +306,7 @@ public class DebateAppMain extends Application {
 		//Configure bottom
 		mainTimerSpeechSelectorBox.setItems(FXCollections.observableArrayList(currentEvent.getValue().getSpeeches()));
 		mainTimerSpeechSelectorBox.setOnAction(e -> {
-			if(mainTimerSpeechSelectorBox.getValue() != null)
+			if(mainTimerSpeechSelectorBox.getValue()!=null)
 				mainTimer.resetTimer(mainTimerSpeechSelectorBox.getValue().getTimeSeconds());
 		});
 		mainTimerSpeechSelectorBox.disableProperty().bind(mainTimer.timerRunningProperty);
@@ -328,7 +329,7 @@ public class DebateAppMain extends Application {
 
 		AppUtils.logger.info("Successfully loaded icons");
 
-		mainStage.setMinWidth(850);
+		mainStage.setMinWidth(925);
 		mainStage.setMinHeight(400);
 		mainStage.setWidth(settings.defaultWidth.getValue());
 		mainStage.setHeight(settings.defaultHeight.getValue());

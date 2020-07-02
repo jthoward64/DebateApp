@@ -7,9 +7,12 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.geometry.Orientation;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Pair;
 import main.java.DebateAppMain;
@@ -42,15 +45,19 @@ public class FlowEditor extends Pane {
 		}
 
 		@Override public void addListener(ChangeListener<? super Number> changeListener) {
+			widthProperty().addListener(changeListener);
 		}
 
 		@Override public void removeListener(ChangeListener<? super Number> changeListener) {
+			widthProperty().removeListener(changeListener);
 		}
 
 		@Override public void addListener(InvalidationListener invalidationListener) {
+			widthProperty().addListener(invalidationListener);
 		}
 
 		@Override public void removeListener(InvalidationListener invalidationListener) {
+			widthProperty().removeListener(invalidationListener);
 		}
 	};
 
@@ -109,8 +116,6 @@ public class FlowEditor extends Pane {
 	}
 
 	/**
-	 * TODO add a setting for vertical vs horizontal
-	 *
 	 * <p>
 	 * List of valid schema and their meanings:<br>
 	 * <table style="width:100%">
@@ -148,16 +153,16 @@ public class FlowEditor extends Pane {
 	/**
 	 * Parses the contents of [...] in a layout String for the parseLayoutString method
 	 */
-	private HBox parseBoxString(String hBoxString, DebateEvent event) {
-		HBox box = new HBox();
+	private Pane parseBoxString(String boxString, DebateEvent event) {
+		Pane box = new HBox();
 		box.prefHeightProperty().bind(heightProperty());
 		box.prefWidthProperty().bind(widthProperty());
-		StringBuilder hBoxStringBuilder = new StringBuilder(hBoxString);
+		StringBuilder hBoxStringBuilder = new StringBuilder(boxString);
 		while(hBoxStringBuilder.length()>0) {
 			if(hBoxStringBuilder.indexOf("h:")==0) {
 				hBoxStringBuilder.delete(0, 2);
 				int endIndex = hBoxStringBuilder.indexOf("h");
-				if (endIndex == -1)
+				if(endIndex==-1)
 					endIndex = hBoxStringBuilder.length();
 				Speech speech = event.getSpeeches().get(Integer.parseInt(hBoxStringBuilder.substring(0, endIndex)));
 				if(!editorHashMap.containsKey(speech)) {
@@ -169,10 +174,15 @@ public class FlowEditor extends Pane {
 					editorHashMap.put(speech, htmlEditor);
 				}
 				orderedEditorSpeechPairs.add(new Pair<>(speech, editorHashMap.get(speech)));
-				box.getChildren().add(new VBox(editorHashMap.get(speech).getEditorLabel(), editorHashMap.get(speech)));
+				VBox column = new VBox(editorHashMap.get(speech).getEditorLabel(), editorHashMap.get(speech));
+				column.setMinWidth(225);
+				box.getChildren().add(column);
 				hBoxStringBuilder.delete(0, endIndex);
 			}
 		}
-		return box;
+			ScrollPane scrollPane = new ScrollPane(box);
+			scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+			scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+			return new StackPane(scrollPane);
 	}
 }

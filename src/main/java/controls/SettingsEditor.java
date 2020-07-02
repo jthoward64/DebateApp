@@ -37,9 +37,9 @@ public class SettingsEditor extends PropertySheet {
 						"Display a message on startup if the installed version of DebateApp is the latest",
 						settings.showNoUpdateMessage));
 
-		getItems().add(buildDoubleItem("Default Height", "Width the app defaults to when it opens",
+		getItems().add(buildDoubleItem("Default Height", "Width the app defaults to when it opens (1 for auto)",
 						settings.defaultHeight));
-		getItems().add(buildDoubleItem("Default Width", "Height the app defaults to when it opens",
+		getItems().add(buildDoubleItem("Default Width", "Height the app defaults to when it opens (1 for auto)",
 						settings.defaultWidth));
 
 		getItems().add(new Item() {

@@ -35,19 +35,19 @@ public class DebateTimer extends Region {
 		Pane box;
 
 		this.graphic = graphic;
-		if (orientation.equals(Orientation.VERTICAL)) {
+		if(orientation.equals(Orientation.VERTICAL)) {
 			box = new VBox();
 			((VBox) box).setAlignment(Pos.CENTER);
-		} else if (orientation.equals(Orientation.HORIZONTAL)) {
+		} else if(orientation.equals(Orientation.HORIZONTAL)) {
 			box = new HBox();
 			((HBox) box).setAlignment(Pos.CENTER);
 		} else
 			throw new IllegalArgumentException("Parameter orientation must be either VERTICAL or HORIZONTAL");
 
-		label.setText(labelText);
+		label.setText(labelText + ' ');
 		label.setGraphic(graphic);
 
-		this.defaultTime=defaultTime;
+		this.defaultTime = defaultTime;
 
 		validationSupport.registerValidator(timerField, false, AppUtils.timeValidator);
 		button.disableProperty().bind(validationSupport.invalidProperty());

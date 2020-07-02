@@ -369,9 +369,8 @@ public class DebateAppMain extends Application {
 							"5. Take a look at the settings menu to customize the app\n\n" +
 							"Lastly you should remember the following key bind:\n" +
 							"\t\t\tControl (Command) + Space\n" +
-							"It will go to the next page of speeches\n" +
-							"Enjoy!");
-			Platform.runLater(infoAlert::showAndWait);
+							"It will go to the next page of speeches\n");
+			infoAlert.showAndWait();
 		}
 
 		Platform.runLater(this::checkForUpdate);

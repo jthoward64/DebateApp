@@ -19,6 +19,7 @@ import org.controlsfx.property.editor.PropertyEditor;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 public class SettingsEditor extends PropertySheet {
 
@@ -112,7 +113,7 @@ public class SettingsEditor extends PropertySheet {
 			}
 
 			@Override public void setValue(Object value) {
-				AppUtils.logger.info(
+				Logger.getLogger("DebateApp").info(
 								"Value of " + getName() + " updated from \"" + getValue() + "\" to \" " + value + '\"');
 				property.setValue((Integer) value);
 			}
@@ -146,7 +147,7 @@ public class SettingsEditor extends PropertySheet {
 			}
 
 			@Override public void setValue(Object value) {
-				AppUtils.logger.info(
+				Logger.getLogger("DebateApp").info(
 								"Value of " + getName() + " updated from \"" + getValue() + "\" to \" " + value + '\"');
 				property.setValue((Double) value);
 			}
@@ -180,7 +181,7 @@ public class SettingsEditor extends PropertySheet {
 			}
 
 			@Override public void setValue(Object value) {
-				AppUtils.logger.info(
+				Logger.getLogger("DebateApp").info(
 								"Value of " + getName() + " updated from \"" + getValue() + "\" to \" " + value + '\"');
 				property.setValue((Boolean) value);
 			}
@@ -214,7 +215,7 @@ public class SettingsEditor extends PropertySheet {
 			}
 
 			@Override public void setValue(Object value) {
-				AppUtils.logger.info(
+				Logger.getLogger("DebateApp").info(
 								"Value of " + getName() + " updated from \"" + getValue() + "\" to \" " + value + '\"');
 				property.setValue((String) value);
 			}
@@ -248,7 +249,7 @@ public class SettingsEditor extends PropertySheet {
 			}
 
 			@Override public void setValue(Object value) {
-				AppUtils.logger.info(
+				Logger.getLogger("DebateApp").info(
 								"Value of " + getName() + " updated from \"" + getValue() + "\" to \" " + value + '\"');
 				property.setValue(enumType.cast(value));
 			}

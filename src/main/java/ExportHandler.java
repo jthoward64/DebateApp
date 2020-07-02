@@ -29,6 +29,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class ExportHandler {
@@ -70,9 +71,9 @@ public class ExportHandler {
 				}
 
 				//Log completion
-				AppUtils.logger.info("Exported as a group of " + type + " images to " + directory.getAbsolutePath());
+				Logger.getLogger("DebateApp").info("Exported as a group of " + type + " images to " + directory.getAbsolutePath());
 			} else
-				AppUtils.logger.info(type + " export cancelled");
+				Logger.getLogger("DebateApp").info(type + " export cancelled");
 		});
 	}
 
@@ -120,9 +121,9 @@ public class ExportHandler {
 				}
 
 				// Log completion
-				AppUtils.logger.info("Exported as a paginated TIFF to " + file.getAbsolutePath());
+				Logger.getLogger("DebateApp").info("Exported as a paginated TIFF to " + file.getAbsolutePath());
 			} else
-				AppUtils.logger.info("TIFF export cancelled");
+				Logger.getLogger("DebateApp").info("TIFF export cancelled");
 		});
 	}
 
@@ -182,9 +183,9 @@ public class ExportHandler {
 				}
 
 				// Log completion
-				AppUtils.logger.info("Exported as a combined PNG to " + file.getAbsolutePath());
+				Logger.getLogger("DebateApp").info("Exported as a combined PNG to " + file.getAbsolutePath());
 			} else
-				AppUtils.logger.info("PNG export cancelled");
+				Logger.getLogger("DebateApp").info("PNG export cancelled");
 		});
 	}
 
@@ -232,6 +233,6 @@ public class ExportHandler {
 
 		wordMLPackage.save(file);
 
-		AppUtils.logger.info("Exported as docx to " + file.getAbsolutePath());
+		Logger.getLogger("DebateApp").info("Exported as docx to " + file.getAbsolutePath());
 	}
 }

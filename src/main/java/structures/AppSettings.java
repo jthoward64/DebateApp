@@ -85,7 +85,7 @@ public class AppSettings {
 
 		AppUtils.allowSave = true;
 
-		AppUtils.logger.info("Settings loaded from " + propertiesFile.getAbsolutePath());
+		Logger.getLogger("DebateApp").info("Settings loaded from " + propertiesFile.getAbsolutePath());
 	}
 
 	public void save() throws IOException {
@@ -128,6 +128,6 @@ public class AppSettings {
 		properties.store(new FileOutputStream(propertiesFile), "Configuration for tajetaje's DebateApp");
 		AppUtils.allowSave = true;
 
-		AppUtils.logger.info("Settings saved to " + propertiesFile.getAbsolutePath());
+		Logger.getLogger("DebateApp").info("Settings saved to " + propertiesFile.getAbsolutePath());
 	}
 }

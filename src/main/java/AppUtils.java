@@ -31,9 +31,9 @@ public class AppUtils {
 	public static       boolean           firstRun      = true;
 	public static final Validator<String> timeValidator = Validator
 					.createRegexValidator("Invalid time", "[0-9]{1,2}:[0-9]{1,2}", Severity.ERROR);
-	public static final Logger            logger        = Logger.getLogger("DebateApp");
-
+	private static final Logger logger = Logger.getLogger("DebateApp");
 	static {
+
 		try {
 			File appHomeDirectory = new File(getAppHome() + File.separatorChar + "DebateApp-%g.log");
 			if(appHomeDirectory.getParentFile().mkdirs())

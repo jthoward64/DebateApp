@@ -36,6 +36,7 @@ import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Logger;
 
 /**
  * <div>Some icons made by <a href="https://www.flaticon.com/authors/freepik" title=
@@ -84,7 +85,7 @@ public class DebateAppMain extends Application {
 	//////Save As
 	SaveHandler editorSaveHandler = new SaveHandler(flowEditor, null);
 	final Action        saveAsAction         = new Action("Save As", e -> {
-		AppUtils.logger.info("Started Save As action");
+		Logger.getLogger("DebateApp").info("Started Save As action");
 		FileChooser chooser = new FileChooser();
 		chooser.setTitle("Save");
 		chooser.getExtensionFilters().add(saveFileFilter);
@@ -92,7 +93,7 @@ public class DebateAppMain extends Application {
 		Platform.runLater(() -> {
 			File file = chooser.showSaveDialog(mainStage);
 			if (file == null) {
-				AppUtils.logger.info("Selected file was null, Save As action aborted");
+				Logger.getLogger("DebateApp").info("Selected file was null, Save As action aborted");
 				return;
 			}
 			editorSaveHandler = new SaveHandler(flowEditor, file);
@@ -105,9 +106,9 @@ public class DebateAppMain extends Application {
 	});
 	//////Save
 	final Action        saveAction           = new Action("Save", e -> {
-		AppUtils.logger.info("Started Save action");
+		Logger.getLogger("DebateApp").info("Started Save action");
 		if (editorSaveHandler.getWorkingFile() == null || !editorSaveHandler.getWorkingFile().exists()) {
-			AppUtils.logger.info("Save file was null or did not exist, running Save As action instead");
+			Logger.getLogger("DebateApp").info("Save file was null or did not exist, running Save As action instead");
 			saveAsAction.handle(e);
 		} else {
 			try {
@@ -119,7 +120,7 @@ public class DebateAppMain extends Application {
 	});
 	//////Open
 	final Action        openAction           = new Action("Open", e -> Platform.runLater(() -> {
-		AppUtils.logger.info("Started Open action");
+		Logger.getLogger("DebateApp").info("Started Open action");
 		FileChooser chooser = new FileChooser();
 		chooser.setTitle("Open");
 		chooser.getExtensionFilters().add(saveFileFilter);
@@ -127,7 +128,7 @@ public class DebateAppMain extends Application {
 		try {
 			File file = chooser.showOpenDialog(mainStage);
 			if (file == null) {
-				AppUtils.logger.info("Selected file was null, Open action aborted");
+				Logger.getLogger("DebateApp").info("Selected file was null, Open action aborted");
 				return;
 			}
 			if (editorSaveHandler == null)
@@ -140,7 +141,7 @@ public class DebateAppMain extends Application {
 	//////Export to PNGs
 	final ExportHandler editorExportHandler  = new ExportHandler(flowEditor);
 	final Action        exportPNGsAction     = new Action("Export to\nmultiple PNGs", e -> Platform.runLater(() -> {
-		AppUtils.logger.info("Started multiple PNG export");
+		Logger.getLogger("DebateApp").info("Exporting to multiple PNGs");
 		Alert alert = new Alert(Alert.AlertType.INFORMATION,
 						"This will save a PNG file for every text box in the current event", ButtonType.OK);
 		alert.setTitle("Export to multiple PNGs");
@@ -151,7 +152,7 @@ public class DebateAppMain extends Application {
 		chooser.setTitle("Export to multiple PNGs");
 		File file = chooser.showDialog(mainStage);
 		if (file == null) {
-			AppUtils.logger.info("Selected file was null, export aborted");
+			Logger.getLogger("DebateApp").info("Selected file was null, export aborted");
 			return;
 		}
 
@@ -159,37 +160,37 @@ public class DebateAppMain extends Application {
 	}));
 	//////Export
 	final Action        exportAction         = new Action("Export", e -> Platform.runLater(() -> {
-		AppUtils.logger.info("Started combined file export");
+		Logger.getLogger("DebateApp").info("Started combined file export");
 		FileChooser chooser = new FileChooser();
 		chooser.setTitle("Export");
 		chooser.getExtensionFilters().addAll(pngFileFilter, tiffFileFilter, docxFileFilter);
 		chooser.setSelectedExtensionFilter(pngFileFilter);
 		File file = chooser.showSaveDialog(mainStage);
 		if (file == null) {
-			AppUtils.logger.info("Selected file was null, export aborted");
+			Logger.getLogger("DebateApp").info("Selected file was null, export aborted");
 			return;
 		}
 		final File finalFile = file;
 		if (chooser.getSelectedExtensionFilter().getExtensions().stream()
 						.noneMatch(extension -> finalFile.getPath().toLowerCase()
 										.endsWith(extension.substring(1).toLowerCase()))) {
-			AppUtils.logger.info("File path does not contain extension, added \"" + chooser.getSelectedExtensionFilter()
+			Logger.getLogger("DebateApp").info("File path does not contain extension, added \"" + chooser.getSelectedExtensionFilter()
 							.getExtensions().get(0) + '\"');
 			file = new File(file.getPath() + chooser.getSelectedExtensionFilter().getExtensions().get(0));
 		}
 
 		try {
 			if (chooser.getSelectedExtensionFilter().equals(pngFileFilter)) {
-				AppUtils.logger.info("");
+				Logger.getLogger("DebateApp").info("Exporting to Big PNG");
 				editorExportHandler.saveToBigPNG(file);
 			} else if (chooser.getSelectedExtensionFilter().equals(tiffFileFilter)) {
-				AppUtils.logger.info("");
+				Logger.getLogger("DebateApp").info("Exporting to paginated TIFF");
 				editorExportHandler.saveToTiff(file);
 			} else if (chooser.getSelectedExtensionFilter().equals(docxFileFilter)) {
-				AppUtils.logger.info("");
+				Logger.getLogger("DebateApp").info("Exporting to DOCX");
 				editorExportHandler.saveToDOCX(file);
 			} else {
-				AppUtils.logger.info("");
+				Logger.getLogger("DebateApp").warning("Unknown export file type selected, export aborted");
 			}
 		} catch (IOException | Docx4JException ex) {
 			AppUtils.showExceptionDialog(ex);
@@ -267,9 +268,9 @@ public class DebateAppMain extends Application {
 	final Scene      mainScene = new Scene(root);
 
 	public static void main(String[] args) {
-		AppUtils.logger.info("Starting with args: " + Arrays.toString(args));
+		Logger.getLogger("DebateApp").info("Starting with args: " + Arrays.toString(args));
 		launch(args);
-		AppUtils.logger.info("Launch method has returned");
+		Logger.getLogger("DebateApp").info("Launch method has returned");
 	}
 
 	@Override public void init() throws Exception {
@@ -279,7 +280,7 @@ public class DebateAppMain extends Application {
 		//OS specific code
 		final String myOS = System.getProperty("os.name").toLowerCase();
 		if (myOS.contains("win")) {//Windows
-			AppUtils.logger.info("OS detected as Windows");
+			Logger.getLogger("DebateApp").info("OS detected as Windows");
 			Files.setAttribute(new File(AppUtils.getAppHome()).toPath(), "dos:hidden", true);
 			if(System.getProperty("os.name").endsWith("10")) {
 				final JMetro jmetro = new JMetro(Style.LIGHT);
@@ -287,12 +288,12 @@ public class DebateAppMain extends Application {
 			}
 		} else { // Not windows
 			if (myOS.contains("mac")) { //macOS
-				AppUtils.logger.info("OS detected as Windows");
+				Logger.getLogger("DebateApp").info("OS detected as Windows");
 			}
 			else if(myOS.contains("nix") || myOS.contains("nux")) {//Linux or Unix
-				AppUtils.logger.info("OS detected as Linux/Unix");
+				Logger.getLogger("DebateApp").info("OS detected as Linux/Unix");
 			} else
-				AppUtils.logger.info("Unknown OS!");
+				Logger.getLogger("DebateApp").info("Unknown OS!");
 		}
 
 		//Configure menu
@@ -327,7 +328,7 @@ public class DebateAppMain extends Application {
 						new Image(getClass().getResourceAsStream("/speaker32.png")),
 						new Image(getClass().getResourceAsStream("/speaker16.png")));
 
-		AppUtils.logger.info("Successfully loaded icons");
+		Logger.getLogger("DebateApp").info("Successfully loaded icons");
 
 		mainStage.setMinWidth(925);
 		mainStage.setMinHeight(400);
@@ -344,7 +345,7 @@ public class DebateAppMain extends Application {
 				try {
 					editorSaveHandler.open(file, events);
 				} catch(IOException e) {
-					AppUtils.logger.warning("Failed to open " + file.getPath());
+					Logger.getLogger("DebateApp").warning("Failed to open " + file.getPath());
 				}
 			}
 		}
@@ -391,16 +392,16 @@ public class DebateAppMain extends Application {
 			}
 		};
 
-		AppUtils.logger.info("Checking if latest release is newer than " + VERSION);
+		Logger.getLogger("DebateApp").info("Checking if latest release is newer than " + VERSION);
 		new Thread(task).start();
 		task.setOnSucceeded(event -> {
-			AppUtils.logger.info("Update Check done");
+			Logger.getLogger("DebateApp").info("Update Check done");
 			try {
 				if (task.get()) {
-					AppUtils.logger.info("Found new version");
+					Logger.getLogger("DebateApp").info("Found new version");
 					checker[0].showUpdateAlert();
 				} else {
-					AppUtils.logger.info("Didn't find new version");
+					Logger.getLogger("DebateApp").info("Didn't find new version");
 					if(settings.showNoUpdateMessage.get()) {
 						Popup noUpdatePopup = new Popup();
 						Label topLabel = new Label("No updates found");
@@ -423,7 +424,7 @@ public class DebateAppMain extends Application {
 					}
 				}
 			} catch (InterruptedException | ExecutionException e) {
-				AppUtils.logger.warning("Update Check failed");
+				Logger.getLogger("DebateApp").warning("Update Check failed");
 			}
 		});
 	}

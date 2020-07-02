@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.logging.Logger;
 
 public class UpdateChecker {
 	private final Version current;
@@ -17,18 +18,18 @@ public class UpdateChecker {
 	public UpdateChecker(Version current) throws IOException {
 		this.current = current;
 
-		AppUtils.logger.info("Checking version " + current + " against GitHub");
+		Logger.getLogger("DebateApp").info("Checking version " + current + " against GitHub");
 		URLConnection connection = new URL("https://github.com/tajetaje/DebateApp/releases/latest").openConnection();
 		connection.connect();
-		AppUtils.logger.info("Connection requested");
+		Logger.getLogger("DebateApp").info("Connection requested");
 
 		InputStream connectionInputStream = connection.getInputStream();
-		AppUtils.logger.info("Latest version url is " + connection.getURL().toExternalForm());
+		Logger.getLogger("DebateApp").info("Latest version url is " + connection.getURL().toExternalForm());
 		latestVersion = new Version(connection.getURL().toExternalForm()
 						.substring(connection.getURL().toExternalForm().lastIndexOf('/') + 1));
 		connectionInputStream.close();
 
-		AppUtils.logger.info("GitHub reports " + latestVersion + " is latest");
+		Logger.getLogger("DebateApp").info("GitHub reports " + latestVersion + " is latest");
 	}
 
 	public boolean check() {

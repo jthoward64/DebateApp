@@ -17,12 +17,14 @@ import javafx.scene.layout.VBox;
 import javafx.util.Pair;
 import main.java.DebateAppMain;
 import main.java.structures.DebateEvent;
+import main.java.structures.Layout;
 import main.java.structures.Speech;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.IllegalFormatException;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class FlowEditor extends Pane {
@@ -65,13 +67,22 @@ public class FlowEditor extends Pane {
 		currentLayout = new SimpleIntegerProperty(defaultLayout);
 		this.currentEvent = currentEvent;
 
-		currentLayout.addListener((observable, oldValue, newValue) -> refreshLayout());
-		currentEvent.addListener(((observable, oldValue, newValue) -> refreshLayout()));
+		currentLayout.addListener((observable, oldValue, newValue) -> {
+			Logger.getLogger("DebateApp").info("Layout changed from " + Layout.getByIndex((Integer) oldValue) +
+							" to " + Layout.getByIndex((Integer) newValue));
+			refreshLayout();
+		});
+		currentEvent.addListener(((observable, oldValue, newValue) -> {
+			Logger.getLogger("DebateApp").info("Event changed from " + oldValue +
+							" to " + newValue);
+			refreshLayout();
+		}));
 
 		refreshLayout();
 	}
 
 	public void setPage(int pageIndex) {
+		Logger.getLogger("DebateApp").info("Page switching from " + currentPage.get() + " to " + pageIndex);
 		getChildren().setAll(flowEditorPages.get(pageIndex));
 		currentPage.set(pageIndex);
 	}
@@ -135,6 +146,8 @@ public class FlowEditor extends Pane {
 	 * @throws IllegalFormatException if any part of layoutString is invalid
 	 */
 	public void refreshLayout() {
+		Logger.getLogger("DebateApp").entering("FlowEditor", "refreshLayout");
+
 		flowEditorPages.clear();
 		orderedEditorSpeechPairs.clear();
 
@@ -148,12 +161,15 @@ public class FlowEditor extends Pane {
 		}
 
 		setPage(0);
+
+		Logger.getLogger("DebateApp").exiting("FlowEditor", "refreshLayout");
 	}
 
 	/**
 	 * Parses the contents of [...] in a layout String for the parseLayoutString method
 	 */
 	private Pane parseBoxString(String boxString, DebateEvent event) {
+		Logger.getLogger("DebateApp").entering("FlowEditor", "parseBoxString", new Object[]{boxString, event});
 		Pane box = new HBox();
 		box.prefHeightProperty().bind(heightProperty());
 		box.prefWidthProperty().bind(widthProperty());
@@ -180,9 +196,13 @@ public class FlowEditor extends Pane {
 				hBoxStringBuilder.delete(0, endIndex);
 			}
 		}
-			ScrollPane scrollPane = new ScrollPane(box);
-			scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-			scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-			return new StackPane(scrollPane);
+
+		ScrollPane scrollPane = new ScrollPane(box);
+		scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+		scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+
+		Logger.getLogger("DebateApp").exiting("FlowEditor", "parseBoxString", scrollPane);
+
+		return new StackPane(scrollPane);
 	}
 }

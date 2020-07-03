@@ -32,6 +32,7 @@ public class AppUtils {
 	public static       boolean           firstRun      = true;
 	public static final Validator<String> timeValidator = Validator
 					.createRegexValidator("Invalid time", "[0-9]{1,2}:[0-9]{1,2}", Severity.ERROR);
+
 	private static final Logger logger = Logger.getLogger("DebateApp");
 	static {
 		try {

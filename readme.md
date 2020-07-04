@@ -45,12 +45,13 @@ Extractable archives are also provided for each OS for manual installation
 * Flow editors for every speech
 * Rich text editing
 * Customizable timers for every speech and for prep (Defaults to NSDA standards)
-* Quick swapping with a keybind between "pages"
+* Quick swapping via keybind between "pages"
 * Multiple layouts for your flows
 * Save your flow as a custom .db8 file so you can come back to it later
-* Export your flow to one large PNG, a PNG for every speech, or a multi-page TIFF
+* Export your flow to a word document, one large PNG, a PNG for every speech, or a multi-page TIFF
 * Set as always on top if you have multiple windows open
 * Links to a number of helpful debate-related sites (including r/Debate)
+* Automatic update checker
 * Easy installer for Windows, macOS, and now for Linux
 
 ## Using the app
@@ -61,8 +62,20 @@ Extractable archives are also provided for each OS for manual installation
 To always open the app to a certain event, change "Default Event" in settings
 
 ### Save your flow
-1. Either press ctrl+s or click save in the File menu
+1. Either press ctrl/cmd+s or click save in the File menu
 2. Select a file to save and click OK
+
+### Open a previously saved flow
+1. Either press ctrl/cmd+o or click open in the File menu
+2. Select the file to open
+
+--- Or ---
+
+Change the default app for .db8 files:
+
+- [macOS](https://www.macworld.com/article/3286190/change-default-app-macos.html)
+- [Windows](https://www.hongkiat.com/blog/change-default-apps-windows-10/) Use option 1, Debate App should be located at `C:\Program Files\DebateApp`
+- [Ubuntu](https://help.ubuntu.com/stable/ubuntu-help/files-open.html.en)
 
 ### Switching layouts
 Select your preferred layout under View 
@@ -74,7 +87,7 @@ If you find the editor toolbars distracting, or unnecessary, they can be disable
 In the view menu, select "always on top"
 
 ## Known issues
- * In a Windows multi-monitor setup with UI scaling on, menus may open in odd locations
+ * If you have multiple monitors with different DPI configurations, menus may open in odd locations. There is nothing I can do about this, it's a bug in JavaFX not DebateApp.
  * Aggressive anti-viruses (e.g. Avast, or macOS Gatekeeper) usually throw a warning about unsigned code
     * Solution: after the first scan most AVs will ignore DebateApp, if they don't simply mark the DebateApp exe as excluded
 
@@ -92,7 +105,7 @@ In the view menu, select "always on top"
 
 ## Versioning
 
-I use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/tajetaje/DebateApp/tags). 
+I use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags for this repository](https://github.com/tajetaje/DebateApp/tags). 
 
 ## Author
 
@@ -109,3 +122,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 * [ControlsFX](https://github.com/controlsfx/controlsfx) just has some really useful pre-coded controls that saved a lot of time in this project
 * [JMetro](https://www.pixelduke.com/java-javafx-theme-jmetro/) provides native look and feel to the windows version
 * [Freepik](https://www.flaticon.com/authors/freepik) created some icons that were used in the app
+* Anyone whose mac I borrowed to test compatibility

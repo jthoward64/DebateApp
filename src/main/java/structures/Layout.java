@@ -1,6 +1,8 @@
 package main.java.structures;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public enum Layout {
@@ -9,8 +11,6 @@ public enum Layout {
 	private final int index;
 
 	Layout(int index) {
-		if(getByIndex(index) != null)
-			throw new IllegalArgumentException("Duplicate indices are not allowed");
 		this.index = index;
 	}
 
@@ -22,10 +22,10 @@ public enum Layout {
 	 * Retrieves the Layout of the specified index.
 	 *
 	 * @param indexToCheck A valid Layout index, as specified in Layout.
-	 * @return The Layout that matches the specified index or null if no such Layout exists
+	 * @return The first Layout that matches the specified index or null if no such Layout exists
 	 */
 	public static Layout getByIndex(int indexToCheck) {
-		for(Layout value : Layout.values()) {
+		for(Layout value : values()) {
 			if (value.index() == indexToCheck)
 				return value;
 		}

@@ -7,7 +7,6 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -19,11 +18,9 @@ import org.controlsfx.validation.ValidationSupport;
 
 public class DebateTimer extends Region {
 
-	private final Timeline  timerTimeline = new Timeline();
-	private final TextField timerField    = new TextField();
+	private final Timeline timerTimeline = new Timeline();
+	private final TextField timerField = new TextField();
 	private final Button button = new Button();
-	private final Label label = new Label();
-	private final Node graphic;
 
 	public final SimpleBooleanProperty timerRunningProperty = new SimpleBooleanProperty(false);
 
@@ -31,21 +28,20 @@ public class DebateTimer extends Region {
 
 	final ValidationSupport validationSupport = new ValidationSupport();
 
-	public DebateTimer(Orientation orientation, String labelText, int defaultTime, Node graphic) {
+	public DebateTimer(Orientation orientation, String labelText, int defaultTime) {
 		Pane box;
 
-		this.graphic = graphic;
-		if(orientation.equals(Orientation.VERTICAL)) {
+		if (orientation.equals(Orientation.VERTICAL)) {
 			box = new VBox();
 			((VBox) box).setAlignment(Pos.CENTER);
-		} else if(orientation.equals(Orientation.HORIZONTAL)) {
+		} else if (orientation.equals(Orientation.HORIZONTAL)) {
 			box = new HBox();
 			((HBox) box).setAlignment(Pos.CENTER);
 		} else
 			throw new IllegalArgumentException("Parameter orientation must be either VERTICAL or HORIZONTAL");
 
+		Label label = new Label();
 		label.setText(labelText + ' ');
-		label.setGraphic(graphic);
 
 		this.defaultTime = defaultTime;
 

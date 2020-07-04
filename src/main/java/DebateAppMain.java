@@ -62,20 +62,20 @@ public class DebateAppMain extends Application {
 
 	public static final AppSettings                       settings       = new AppSettings(
 					new File(AppUtils.getAppHome()));
-	final               SettingsEditor                    settingsEditor = new SettingsEditor(settings);
-	final               DebateEvents                      events         = settings.debateEvents;
-	final               SimpleObjectProperty<DebateEvent> currentEvent   = new SimpleObjectProperty<>(settings.defaultEvent.getValue());
+	final SettingsEditor settingsEditor = new SettingsEditor(settings);
+	final DebateEvents events = settings.debateEvents;
+	final SimpleObjectProperty<DebateEvent> currentEvent = new SimpleObjectProperty<>(settings.defaultEvent.getValue());
 
 	//Bottom
-	final DebateTimer      mainTimer                  = new DebateTimer(Orientation.HORIZONTAL, "Speech Timer", 0, null);
+	final DebateTimer mainTimer = new DebateTimer(Orientation.HORIZONTAL, "Speech Timer", 0);
 	final ComboBox<Speech> mainTimerSpeechSelectorBox = new ComboBox<>();
 	final HBox mainTimerBox = new HBox(mainTimer, mainTimerSpeechSelectorBox);
 
-	final DebateTimer conPrep = new DebateTimer(Orientation.HORIZONTAL, "Con", 180, null);
+	final DebateTimer conPrep = new DebateTimer(Orientation.HORIZONTAL, "Con", 180);
 
-	final DebateTimer proPrep = new DebateTimer(Orientation.HORIZONTAL, "Pro", 180, null);
+	final DebateTimer proPrep = new DebateTimer(Orientation.HORIZONTAL, "Pro", 180);
 
-	final BorderPane             bottom                     = new BorderPane(mainTimerBox, null, conPrep, null, proPrep);
+	final BorderPane bottom = new BorderPane(mainTimerBox, null, conPrep, null, proPrep);
 
 	//Center
 	final FlowEditor flowEditor = new FlowEditor(settings.defaultLayout.get().index(), currentEvent);

@@ -46,6 +46,8 @@ import java.util.logging.Logger;
  * @author Tag Howard
  */
 public class DebateAppMain extends Application {
+	public static boolean DEBUGMODE = false;
+
 	public static final Version VERSION = new Version("2.0.0");
 	public static final FileChooser.ExtensionFilter pngFileFilter = new FileChooser.ExtensionFilter("PNG image",
 					"*.png");
@@ -268,6 +270,12 @@ public class DebateAppMain extends Application {
 	final Scene      mainScene = new Scene(root);
 
 	public static void main(String[] args) {
+		for (String arg : args) {
+			if(arg.equals("DEBUGMODE")) {
+				DEBUGMODE = true;
+				break;
+			}
+		}
 		Logger.getLogger("DebateApp").info("Starting with args: " + Arrays.toString(args));
 		launch(args);
 		Logger.getLogger("DebateApp").info("Launch method has returned");
@@ -335,9 +343,7 @@ public class DebateAppMain extends Application {
 		mainStage.setWidth(settings.defaultWidth.getValue());
 		mainStage.setHeight(settings.defaultHeight.getValue());
 
-		List<String> args = getParameters().getRaw();
-		for(String argument : args) {
-			System.out.println(argument);
+		for(String argument : getParameters().getRaw()) {
 			File file = new File(argument);
 			if(file.exists()) {
 				if(editorSaveHandler==null)
@@ -347,12 +353,13 @@ public class DebateAppMain extends Application {
 				} catch(IOException e) {
 					Logger.getLogger("DebateApp").warning("Failed to open " + file.getPath());
 				}
+				break;
 			}
 		}
 
 		mainStage.show();
 
-		if(AppUtils.firstRun || AppSettings.DEBUGMODE) {
+		if(AppUtils.firstRun || DEBUGMODE) {
 			Alert infoAlert = new Alert(Alert.AlertType.INFORMATION);
 			infoAlert.setTitle("Info dialog");
 			infoAlert.setHeaderText("Welcome to DebateApp");

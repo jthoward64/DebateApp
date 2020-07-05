@@ -12,7 +12,6 @@ import javafx.scene.layout.Priority;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
-import main.java.structures.AppSettings;
 import org.controlsfx.validation.Severity;
 import org.controlsfx.validation.Validator;
 
@@ -43,7 +42,7 @@ public class AppUtils {
 		} catch(IOException e) {
 			showExceptionDialog(e);
 		}
-		logger.setUseParentHandlers(AppSettings.DEBUGMODE);
+		logger.setUseParentHandlers(DebateAppMain.DEBUGMODE);
 		logger.getHandlers()[0].setFormatter(new SimpleFormatter());
 	}
 

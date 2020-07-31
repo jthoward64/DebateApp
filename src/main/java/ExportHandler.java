@@ -11,7 +11,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import main.java.controls.FlowEditor;
 import main.java.controls.MinimalHTMLEditor;
-import org.apache.commons.io.output.StringBuilderWriter;
 import org.docx4j.convert.in.xhtml.XHTMLImporterImpl;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
@@ -23,11 +22,7 @@ import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
-import java.util.ArrayList;
+import java.io.*;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -216,7 +211,7 @@ public class ExportHandler {
 		tidy.setXHTML(true);
 
 		Reader targetReader = new StringReader(fullHtmlText);
-		StringBuilderWriter writer = new StringBuilderWriter();
+		StringWriter writer = new StringWriter();
 
 		tidy.parse(targetReader, writer);
 		String xhtmlText = writer.toString();

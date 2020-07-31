@@ -71,10 +71,12 @@ To always open the app to a certain event, change "Default Event" in settings
 
 --- Or ---
 
-Change the default app for .db8 files:
+Open the file by double-clicking, DebateApp should automatically associate .db8 with DebateApp
 
-- [macOS](https://www.macworld.com/article/3286190/change-default-app-macos.html)
-- [Windows](https://www.hongkiat.com/blog/change-default-apps-windows-10/) Use option 1, Debate App should be located at `C:\Program Files\DebateApp`
+... but if it doesn't follow the instructions for your OS:
+
+- [Windows](https://www.hongkiat.com/blog/change-default-apps-windows-10/)
+- [macOS](https://www.imore.com/how-set-mac-app-default-when-opening-file)
 - [Ubuntu](https://help.ubuntu.com/stable/ubuntu-help/files-open.html.en)
 
 ### Switching layouts
